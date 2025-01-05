@@ -18,7 +18,7 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 75 },
+      { length: 88 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpg`
     );
     const shuffledImages = shuffleArray(generatedImages); // Shuffle images randomly

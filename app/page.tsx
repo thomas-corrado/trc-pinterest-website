@@ -24,6 +24,8 @@ export default function Home() {
     const shuffledImages = shuffleArray(generatedImages); // Shuffle images randomly
     setImages(shuffledImages);
 
+    console.log(generatedImages);
+
     // Attempt to play audio
     if (audioRef.current) {
       console.log("Audio element reference:", audioRef.current);

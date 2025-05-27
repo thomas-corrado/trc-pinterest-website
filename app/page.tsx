@@ -49,7 +49,7 @@ export default function Home() {
   return (
     <div className="masonry-container p-4">
       {/* Audio Element */}
-      <audio ref={audioRef} src="/Billie (Loving Arms) 1.m4a" loop />
+      <audio ref={audioRef} src="/Open Season.m4a" loop />
 
       {/* Manual Play Controls */}
       <div className="fixed bottom-4 right-4 z-50">

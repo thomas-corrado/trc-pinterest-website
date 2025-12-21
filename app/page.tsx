@@ -18,13 +18,11 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 88 },
+      { length: 136 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpg`
     );
     const shuffledImages = shuffleArray(generatedImages); // Shuffle images randomly
     setImages(shuffledImages);
-
-    console.log(generatedImages);
 
     // Attempt to play audio
     if (audioRef.current) {
@@ -49,7 +47,7 @@ export default function Home() {
   return (
     <div className="masonry-container p-4">
       {/* Audio Element */}
-      <audio ref={audioRef} src="/Open Season.m4a" loop />
+      <audio ref={audioRef} src="/06 Tate (How I Feel).m4a" loop />
 
       {/* Manual Play Controls */}
       <div className="fixed bottom-4 right-4 z-50">

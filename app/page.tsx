@@ -22,9 +22,8 @@ export default function Home() {
     `Ring the bells that still can ring.\nForget your perfect offering.\nThere is a crack in everything.\nThat's how the light gets in.\n- Leonard Cohen`,
     `God, grant me the serenity to accept the things I cannot change,\nCourage to change the things I can,\nAnd wisdom to know the difference.\n- Reinhold Niebuhr`,
     `Life is coming from you, not at you.\n- Timothée Chalamet`,
-    `Your worst sin is that you have destroyed and betrayed yourself for nothing.\n- Fyodor Dostoevsky`,
-    `And now that you don't have to be perfect, you can be good.\n- John Steinbeck`,
-    `I swear to you that to think too much is a disease, a real, actual disease.\n- Fyodor Dostoevsky`,
+    `There is a word in Korean. In-Yun (인연). It means "fate". But it's specifically about relationships between people. It's an In-Yun if two strangers even walk by each other in the street and their clothes accidentally brush. Because it means there must have been something between them in their past lives.\n - Past Lives, Greta Lee`,
+    `Yesterday is history, tomorrow is a mystery, but today is a gift — that is why it is called it the present.\n- Master Oogway`,
   ];
 
   useEffect(() => {
@@ -60,11 +59,25 @@ export default function Home() {
 
   return (
     <>
-      {/* Centered paragraph above the image grid, full width */}
-      <div className="w-screen max-w-full justify-center flex">
-        <p className="text-left text-gray-700 text-xl max-w-3xl mx-4 mt-4 mb-0 whitespace-pre-line">
-          {quote}
-        </p>
+      {/* Centered paragraph and new quote button above the image grid, full width */}
+      <div className="w-screen max-w-full flex flex-col items-center mt-4 mb-0">
+        <div className="flex flex-col items-center w-full">
+          <p className="text-left text-gray-700 text-xl max-w-3xl mx-4 mb-2 whitespace-pre-line">
+            {quote}
+          </p>
+          <button
+            onClick={() => {
+              let newQuote = quote;
+              while (newQuote === quote && quotes.length > 1) {
+                newQuote = quotes[Math.floor(Math.random() * quotes.length)];
+              }
+              setQuote(newQuote);
+            }}
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+          >
+            New Quote
+          </button>
+        </div>
       </div>
 
       <div className="masonry-container p-4">

@@ -113,7 +113,11 @@ export default function Home() {
 
       <div className="masonry-container">
         {/* Audio Element */}
-        <audio ref={audioRef} src="/01 Into Dust (Still Falling).m4a" loop />
+        <audio
+          ref={audioRef}
+          src="Into Dust (Still Falling) trimmed.m4a"
+          loop
+        />
 
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">

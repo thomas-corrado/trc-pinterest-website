@@ -15,6 +15,8 @@ const shuffleArray = (array: string[]) => {
 export default function Home() {
   const [images, setImages] = useState<string[]>([]);
   const [quote, setQuote] = useState<string>("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Array of quotes
@@ -49,6 +51,35 @@ export default function Home() {
     }
   }, []);
 
+  // Modal navigation handlers
+  const openModal = (index: number) => {
+    setModalIndex(index);
+    setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalIndex(null);
+  };
+  const showPrev = () => {
+    if (modalIndex !== null && modalIndex > 0) setModalIndex(modalIndex - 1);
+  };
+  const showNext = () => {
+    if (modalIndex !== null && modalIndex < images.length - 1)
+      setModalIndex(modalIndex + 1);
+  };
+
+  // Close modal on Escape key
+  React.useEffect(() => {
+    if (!modalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowLeft") showPrev();
+      if (e.key === "ArrowRight") showNext();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [modalOpen, modalIndex]);
+
   if (images.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -73,7 +104,7 @@ export default function Home() {
               }
               setQuote(newQuote);
             }}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+            className="mt-2 px-4 py-2 bg-black text-white rounded-md shadow hover:bg-gray-900"
           >
             New Quote
           </button>
@@ -102,7 +133,11 @@ export default function Home() {
 
         {/* Masonry Grid */}
         {images.map((src, index) => (
-          <div key={index} className="masonry-item overflow-hidden">
+          <div
+            key={index}
+            className="masonry-item overflow-hidden cursor-pointer"
+            onClick={() => openModal(index)}
+          >
             <img
               src={src}
               alt={`Pinterest Image ${index + 1}`}
@@ -111,6 +146,48 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {/* Modal for image preview */}
+      {modalOpen && modalIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80"
+          onClick={closeModal}
+        >
+          <div
+            className="relative flex flex-col items-center justify-center"
+            style={{ maxWidth: "90vw", maxHeight: "90vh" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={images[modalIndex]}
+              alt={`Large Pinterest Image ${modalIndex + 1}`}
+              className="max-w-full max-h-[80vh] rounded shadow-lg mb-4"
+            />
+            <div className="flex items-center justify-center gap-4 mt-2">
+              <button
+                onClick={showPrev}
+                disabled={modalIndex === 0}
+                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+              >
+                &#8592;
+              </button>
+              <button
+                onClick={closeModal}
+                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+              >
+                &#10005; Close
+              </button>
+              <button
+                onClick={showNext}
+                disabled={modalIndex === images.length - 1}
+                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+              >
+                &#8594;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

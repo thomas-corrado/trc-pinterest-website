@@ -24,7 +24,6 @@ export default function Home() {
     `Ring the bells that still can ring.\nForget your perfect offering.\nThere is a crack in everything.\nThat's how the light gets in.\n- Leonard Cohen`,
     `God, grant me the serenity to accept the things I cannot change,\nCourage to change the things I can,\nAnd wisdom to know the difference.\n- Reinhold Niebuhr`,
     `Life is coming from you, not at you.\n- Timothée Chalamet`,
-    `There is a word in Korean. In-Yun (인연). It means "fate". But it's specifically about relationships between people. It's an In-Yun if two strangers even walk by each other in the street and their clothes accidentally brush. Because it means there must have been something between them in their past lives.\n - Past Lives, Greta Lee`,
     `Yesterday is history, tomorrow is a mystery, but today is a gift — that is why it is called it the present.\n- Master Oogway`,
   ];
 
@@ -93,7 +92,7 @@ export default function Home() {
       {/* Centered paragraph and new quote button above the image grid, full width */}
       <div className="w-screen max-w-full flex flex-col items-center mt-4 mb-0">
         <div className="flex flex-col items-center w-full">
-          <p className="text-left text-gray-700 text-xl max-w-3xl mx-4 mb-2 whitespace-pre-line">
+          <p className="text-left text-gray-700 text-l max-w-3xl mx-4 mb-2 whitespace-pre-line font-mono">
             {quote}
           </p>
           <button
@@ -104,14 +103,14 @@ export default function Home() {
               }
               setQuote(newQuote);
             }}
-            className="mt-2 px-4 py-2 bg-black text-white rounded-md shadow hover:bg-gray-900"
+            className="mt-2 px-4 py-2 bg-black text-white rounded-md shadow hover:bg-gray-900 font-mono"
           >
             New Quote
           </button>
         </div>
       </div>
 
-      <div className="masonry-container p-4">
+      <div className="masonry-container">
         {/* Audio Element */}
         <audio ref={audioRef} src="/01 Into Dust (Still Falling).m4a" loop />
 
@@ -135,7 +134,7 @@ export default function Home() {
         {images.map((src, index) => (
           <div
             key={index}
-            className="masonry-item overflow-hidden cursor-pointer"
+            className="masonry-item overflow-hidden cursor-pointer relative group"
             onClick={() => openModal(index)}
           >
             <img
@@ -143,6 +142,14 @@ export default function Home() {
               alt={`Pinterest Image ${index + 1}`}
               className="w-full h-auto object-cover"
             />
+            {index === 0 && (
+              <span
+                className="absolute top-2 left-2 bg-black bg-opacity-80 text-white text-xs rounded px-2 py-1 shadow transition-opacity duration-200 opacity-80 group-hover:opacity-100 group-active:opacity-100 font-mono"
+                style={{ pointerEvents: "none" }}
+              >
+                click me
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -163,11 +170,11 @@ export default function Home() {
               alt={`Large Pinterest Image ${modalIndex + 1}`}
               className="max-w-full max-h-[80vh] rounded shadow-lg mb-4"
             />
-            <div className="flex items-center justify-center gap-4 mt-2">
+            <div className="flex items-center justify-center gap-2 mt-1">
               <button
                 onClick={showPrev}
                 disabled={modalIndex === 0}
-                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900"
               >
                 &#8592;
               </button>
@@ -175,12 +182,12 @@ export default function Home() {
                 onClick={closeModal}
                 className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
               >
-                &#10005; Close
+                &#10005;
               </button>
               <button
                 onClick={showNext}
                 disabled={modalIndex === images.length - 1}
-                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900"
               >
                 &#8594;
               </button>

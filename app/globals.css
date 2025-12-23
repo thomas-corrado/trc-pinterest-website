@@ -6,6 +6,7 @@
 .masonry-container {
   column-count: 4; /* Default for larger screens */
   column-gap: 16px; /* Space between columns */
+  padding: 16px;
 }
 
 .masonry-item {
@@ -17,11 +18,20 @@
 @media (max-width: 1024px) {
   .masonry-container {
     column-count: 3; /* Fewer columns on medium screens */
+    column-gap: 16px; /* Space between columns */
+  }
+  .masonry-item {
+    margin-bottom: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .masonry-container {
     column-count: 2; /* Larger images on small screens */
+    column-gap: 8px; /* Space between columns */
+    padding: 16px 8px 8px 8px;
+  }
+  .masonry-item {
+    margin-bottom: 8px;
   }
 }

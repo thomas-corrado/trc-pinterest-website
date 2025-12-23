@@ -118,13 +118,13 @@ export default function Home() {
         <div className="fixed bottom-4 right-4 z-50">
           <button
             onClick={() => audioRef.current?.play()}
-            className="px-4 py-2 bg-green-500 text-white rounded-md"
+            className="px-4 py-2 bg-green-500 text-white rounded-md font-mono"
           >
             Play Music
           </button>
           <button
             onClick={() => audioRef.current?.pause()}
-            className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
+            className="px-4 py-2 bg-red-500 text-white rounded-md ml-2 font-mono"
           >
             Pause Music
           </button>
@@ -166,20 +166,20 @@ export default function Home() {
               <button
                 onClick={showPrev}
                 disabled={modalIndex === 0}
-                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900"
+                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
               >
                 &#8592;
               </button>
               <button
                 onClick={closeModal}
-                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900"
+                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
               >
                 &#10005;
               </button>
               <button
                 onClick={showNext}
                 disabled={modalIndex === images.length - 1}
-                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900"
+                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
               >
                 &#8594;
               </button>

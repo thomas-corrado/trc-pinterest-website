@@ -142,14 +142,6 @@ export default function Home() {
               alt={`Pinterest Image ${index + 1}`}
               className="w-full h-auto object-cover"
             />
-            {index === 0 && (
-              <span
-                className="absolute top-2 left-2 bg-black bg-opacity-80 text-white text-xs rounded px-2 py-1 shadow transition-opacity duration-200 opacity-80 group-hover:opacity-100 group-active:opacity-100 font-mono"
-                style={{ pointerEvents: "none" }}
-              >
-                click me
-              </span>
-            )}
           </div>
         ))}
       </div>

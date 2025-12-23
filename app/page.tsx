@@ -18,6 +18,7 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const swipeStartX = useRef<number | null>(null);
 
   // Array of quotes
   const quotes = [
@@ -156,6 +157,24 @@ export default function Home() {
             className="relative flex flex-col items-center justify-center"
             style={{ maxWidth: "90vw", maxHeight: "90vh" }}
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => {
+              if (e.touches.length === 1) {
+                swipeStartX.current = e.touches[0].clientX;
+              }
+            }}
+            onTouchEnd={(e) => {
+              if (swipeStartX.current === null) return;
+              const endX = e.changedTouches[0].clientX;
+              const diff = endX - swipeStartX.current;
+              swipeStartX.current = null;
+              if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                  showPrev();
+                } else {
+                  showNext();
+                }
+              }
+            }}
           >
             <img
               src={images[modalIndex]}

@@ -82,7 +82,7 @@ export default function Home() {
 
       <div className="masonry-container p-4">
         {/* Audio Element */}
-        <audio ref={audioRef} src="/06 Tate (How I Feel).m4a" loop />
+        <audio ref={audioRef} src="/01 Into Dust (Still Falling).m4a" loop />
 
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">

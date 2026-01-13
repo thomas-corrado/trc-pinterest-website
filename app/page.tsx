@@ -2,15 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 
-// Utility function to shuffle an array
-const shuffleArray = (array: string[]) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
+// Images are shown in sequential order (no shuffling)
 
 export default function Home() {
   const [images, setImages] = useState<string[]>([]);
@@ -22,10 +14,7 @@ export default function Home() {
 
   // Array of quotes
   const quotes = [
-    `Ring the bells that still can ring.\nForget your perfect offering.\nThere is a crack in everything.\nThat's how the light gets in.\n- Leonard Cohen`,
-    `God, grant me the serenity to accept the things I cannot change,\nCourage to change the things I can,\nAnd wisdom to know the difference.\n- Reinhold Niebuhr`,
-    `Life is coming from you, not at you.\n- Timothée Chalamet`,
-    `Yesterday is history, tomorrow is a mystery, but today is a gift — that is why it is called it the present.\n- Master Oogway`,
+    `“‘It’s all completely perfect,’ the story will say. ‘It’s just like it is in the pictures.’”\n- Vincenzo Latronico, Perfection`,
   ];
 
   useEffect(() => {
@@ -33,8 +22,7 @@ export default function Home() {
       { length: 93 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`
     );
-    const shuffledImages = shuffleArray(generatedImages); // Shuffle images randomly
-    setImages(shuffledImages);
+    setImages(generatedImages);
 
     // Pick a random quote
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
@@ -93,10 +81,10 @@ export default function Home() {
       {/* Centered paragraph and new quote button above the image grid, full width */}
       <div className="w-screen max-w-full flex flex-col items-center mt-4 mb-0">
         <div className="flex flex-col items-center w-full">
-          <p className="text-left text-gray-700 text-l max-w-3xl mx-4 mb-2 whitespace-pre-line font-mono">
+          <p className="text-left text-gray-700 text-l max-w-3xl mx-4 whitespace-pre-line font-mono">
             {quote}
           </p>
-          <button
+          {/* <button
             onClick={() => {
               let newQuote = quote;
               while (newQuote === quote && quotes.length > 1) {
@@ -107,17 +95,13 @@ export default function Home() {
             className="mt-2 px-4 py-2 bg-black text-white rounded-md shadow hover:bg-gray-900 font-mono"
           >
             New Quote
-          </button>
+          </button> */}
         </div>
       </div>
 
       <div className="masonry-container">
         {/* Audio Element */}
-        <audio
-          ref={audioRef}
-          src="Into Dust (Still Falling) trimmed.m4a"
-          loop
-        />
+        <audio ref={audioRef} src="05 Blue Spring.m4a" loop />
 
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">

@@ -18,9 +18,10 @@
 @media (max-width: 1024px) {
   .masonry-container {
     column-count: 3; /* Fewer columns on medium screens */
-    column-gap: 2px; /* Space between columns */
+    column-gap: 1px; /* Space between columns */
+    padding: 16px 1px 1px 1px;
   }
   .masonry-item {
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
 }

@@ -131,6 +131,11 @@ export default function Home() {
               alt={`Pinterest Image ${index + 1}`}
               className="w-full h-auto object-cover"
             />
+            {index === 0 && (
+              <div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-0.5 m-1 text-xs font-mono rounded-md">
+                click me :)
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -19,8 +19,8 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 93 },
-      (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`
+      { length: 99 },
+      (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`,
     );
     setImages(generatedImages);
 
@@ -33,7 +33,7 @@ export default function Home() {
       audioRef.current.play().catch((err) => {
         console.warn(
           "Audio playback failed. Waiting for user interaction:",
-          err
+          err,
         );
       });
     }

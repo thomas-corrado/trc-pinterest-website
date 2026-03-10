@@ -19,7 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 102 },
+      { length: 104 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`,
     );
     setImages(generatedImages);
@@ -101,7 +101,7 @@ export default function Home() {
 
       <div className="masonry-container">
         {/* Audio Element */}
-        <audio ref={audioRef} src="Open Season.m4a" loop />
+        <audio ref={audioRef} src="01 Can't Do Without You.m4a" loop />
 
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">

@@ -101,7 +101,7 @@ export default function Home() {
 
       <div className="masonry-container">
         {/* Audio Element */}
-        <audio ref={audioRef} src="05 Blue Spring.m4a" loop />
+        <audio ref={audioRef} src="01 Baxter (These Are My Friends).m4a" loop />
 
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">

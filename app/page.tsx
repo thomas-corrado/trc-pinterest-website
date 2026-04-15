@@ -10,6 +10,17 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  // List of available songs in public folder
+  const songs = [
+    "01 Baxter (These Are My Friends).m4a",
+    "01 Can't Do Without You.m4a",
+    "marea(chicagoEdit).mp3",
+    "05 Blue Spring.m4a",
+    "Billie (Loving Arms) 1.m4a",
+    "Open Season.m4a",
+    "06 Tate (How I Feel).m4a",
+    "Into Dust (Still Falling) trimmed.m4a",
+  ];
   const swipeStartX = useRef<number | null>(null);
 
   // Array of quotes
@@ -106,7 +117,21 @@ export default function Home() {
         {/* Manual Play Controls */}
         <div className="fixed bottom-4 right-4 z-50">
           <button
-            onClick={() => audioRef.current?.play()}
+            onClick={() => {
+              if (audioRef.current) {
+                // Pick a random song
+                const randomSong =
+                  songs[Math.floor(Math.random() * songs.length)];
+                // Only change src if different
+                if (
+                  audioRef.current.src !==
+                  window.location.origin + "/" + randomSong
+                ) {
+                  audioRef.current.src = randomSong;
+                }
+                audioRef.current.play();
+              }
+            }}
             className="px-4 py-2 bg-green-500 text-white rounded-md font-mono"
           >
             Play Music

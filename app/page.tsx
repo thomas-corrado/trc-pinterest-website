@@ -14,12 +14,10 @@ export default function Home() {
   const songs = [
     "01 Baxter (These Are My Friends).m4a",
     "01 Can't Do Without You.m4a",
-    "marea(chicagoEdit).mp3",
     "05 Blue Spring.m4a",
     "Billie (Loving Arms) 1.m4a",
     "Open Season.m4a",
     "06 Tate (How I Feel).m4a",
-    "Into Dust (Still Falling) trimmed.m4a",
   ];
   const swipeStartX = useRef<number | null>(null);
 

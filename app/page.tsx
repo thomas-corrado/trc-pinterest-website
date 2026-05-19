@@ -28,7 +28,7 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 104 },
+      { length: 107 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`,
     );
     setImages(generatedImages);

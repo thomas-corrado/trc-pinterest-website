@@ -11,14 +11,14 @@ export default function Home() {
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   // List of available songs in public folder
-  const songs = [
-    "01 Baxter (These Are My Friends).m4a",
-    "01 Can't Do Without You.m4a",
-    "05 Blue Spring.m4a",
-    "Billie (Loving Arms) 1.m4a",
-    "Open Season.m4a",
-    "06 Tate (How I Feel).m4a",
-  ];
+  // const songs = [
+  //   "01 Baxter (These Are My Friends).m4a",
+  //   "01 Can't Do Without You.m4a",
+  //   "05 Blue Spring.m4a",
+  //   "Billie (Loving Arms) 1.m4a",
+  //   "Open Season.m4a",
+  //   "06 Tate (How I Feel).m4a",
+  // ];
   const swipeStartX = useRef<number | null>(null);
 
   // Array of quotes
@@ -28,7 +28,7 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 120 },
+      { length: 119 },
       (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`,
     );
     setImages(generatedImages);
@@ -119,7 +119,8 @@ export default function Home() {
               if (audioRef.current) {
                 // Pick a random song
                 const randomSong =
-                  songs[Math.floor(Math.random() * songs.length)];
+                  // songs[Math.floor(Math.random() * songs.length)];
+                  "02 Two Thousand and Seventeen.m4a";
                 // Only change src if different
                 if (
                   audioRef.current.src !==

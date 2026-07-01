@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+// IMPORTED: Next.js high-performance Image component
+import Image from "next/image";
 
 // Images are shown in sequential order (no shuffling)
 
@@ -27,9 +29,10 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    // UPDATED: Now targeting the newly converted .webp images instead of .jpeg
     const generatedImages = Array.from(
       { length: 120 },
-      (_, i) => `/trc-pinterest-${i + 1}.jpeg`,
+      (_, i) => `/trc-pinterest-${i + 1}.webp`,
     );
     setImages(generatedImages);
 
@@ -138,10 +141,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* RECTANGLE INSTAGRAM GRID:
-        - Fixed strict 3-columns across ALL device screens (grid-cols-3)
-        - Changed aspect-square to aspect-[2/3] for a beautiful tall portrait rectangle look
-      */}
+      {/* INSTAGRAM RECTANGLE GRID WITH NEXT.JS IMAGE OPTIMIZATION */}
       <div className="grid grid-cols-3 gap-[1px] pt-4 px-[1px] pb-[3px] max-w-4xl mx-auto">
         {images.map((src, index) => (
           <div
@@ -149,13 +149,18 @@ export default function Home() {
             className="aspect-[2/3] overflow-hidden cursor-pointer relative bg-gray-100"
             onClick={() => openModal(index)}
           >
-            <img
+            {/* UPDATED: Replaced standard <img> with Next.js <Image /> */}
+            <Image
               src={src}
               alt={`Instagram Grid Image ${index + 1}`}
-              className="w-full h-full object-cover active:opacity-80 transition-opacity"
+              fill
+              sizes="(max-width: 768px) 33vw, (max-width: 1200px) 25vw, 20vw"
+              className="object-cover active:opacity-80 transition-opacity"
+              // OPTIMIZED: The first 6 images load instantly (above-the-fold), the rest lazy-load dynamically
+              priority={index < 6}
             />
             {index === 0 && (
-              <div className="absolute top-0 left-0 bg-black bg-opacity-60 text-white p-1 m-1 text-[10px] font-mono rounded">
+              <div className="absolute top-0 left-0 bg-black bg-opacity-60 text-white p-1 m-1 text-[10px] font-mono rounded z-10">
                 click me :)
               </div>
             )}
@@ -169,7 +174,7 @@ export default function Home() {
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
           onClick={closeModal}
         >
-          {/* Top navigation header for standard mobile overlay feel */}
+          {/* Top navigation header */}
           <div className="absolute top-0 w-full flex justify-between items-center px-4 py-4 text-white font-mono text-sm z-10 bg-gradient-to-b from-black/50 to-transparent">
             <span>
               {modalIndex + 1} / {images.length}
@@ -204,15 +209,20 @@ export default function Home() {
               }
             }}
           >
-            {/* The Image scales up natively to fit the container bounds while preserving aspect ratio */}
-            <img
-              src={images[modalIndex]}
-              alt={`Large View Image ${modalIndex + 1}`}
-              className="max-w-full max-h-[75vh] object-contain select-none shadow-2xl"
-            />
+            {/* UPDATED: Optimized full view image. Standard unoptimized layout handles variable photo scaling perfectly here */}
+            <div className="relative w-full h-[75vh] flex items-center justify-center">
+              <Image
+                src={images[modalIndex]}
+                alt={`Large View Image ${modalIndex + 1}`}
+                fill
+                sizes="(max-width: 1200px) 100vw, 800px"
+                className="object-contain select-none"
+                priority
+              />
+            </div>
 
             {/* Navigation buttons */}
-            <div className="flex items-center justify-center gap-6 mt-6 w-full">
+            <div className="flex items-center justify-center gap-6 mt-6 w-full z-10">
               <button
                 onClick={showPrev}
                 disabled={modalIndex === 0}

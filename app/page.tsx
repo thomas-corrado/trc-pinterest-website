@@ -142,7 +142,7 @@ export default function Home() {
         - Fixed strict 3-columns across ALL device screens (grid-cols-3)
         - Changed aspect-square to aspect-[2/3] for a beautiful tall portrait rectangle look
       */}
-      <div className="grid grid-cols-3 gap-[1px] pt-4 px-[3px] pb-[3px] max-w-4xl mx-auto">
+      <div className="grid grid-cols-3 gap-[1px] pt-4 px-[1px] pb-[3px] max-w-4xl mx-auto">
         {images.map((src, index) => (
           <div
             key={index}

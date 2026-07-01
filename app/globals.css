@@ -2,26 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Masonry grid container */
-.masonry-container {
-  column-count: 4; /* Default for larger screens */
-  column-gap: 2px; /* Space between columns */
-  padding: 16px 2px 2px 2px;
-}
-
-.masonry-item {
-  break-inside: avoid;
-  margin-bottom: 2px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .masonry-container {
-    column-count: 3; /* Fewer columns on medium screens */
-    column-gap: 1px; /* Space between columns */
-    padding: 16px 1px 1px 1px;
-  }
-  .masonry-item {
-    margin-bottom: 1px;
-  }
-}
+/* Note: .masonry-container and .masonry-item custom styles have been removed. 
+  The row-first alignment and ultra-tight 2px margins are now safely generated 
+  directly via Tailwind utility tags in the main code component.
+*/

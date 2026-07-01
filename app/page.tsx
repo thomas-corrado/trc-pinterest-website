@@ -28,8 +28,8 @@ export default function Home() {
 
   useEffect(() => {
     const generatedImages = Array.from(
-      { length: 119 },
-      (_, i) => `/trc-pinterest-${(i + 1).toString().padStart(2, "0")}.jpeg`,
+      { length: 120 },
+      (_, i) => `/trc-pinterest-${i + 1}.jpeg`,
     );
     setImages(generatedImages);
 
@@ -108,55 +108,54 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="masonry-container">
-        {/* Audio Element */}
-        <audio ref={audioRef} src="01 Baxter (These Are My Friends).m4a" loop />
+      {/* Audio Element */}
+      <audio ref={audioRef} src="01 Baxter (These Are My Friends).m4a" loop />
 
-        {/* Manual Play Controls */}
-        <div className="fixed bottom-4 right-4 z-50">
-          <button
-            onClick={() => {
-              if (audioRef.current) {
-                // Pick a random song
-                const randomSong =
-                  // songs[Math.floor(Math.random() * songs.length)];
-                  "02 Two Thousand and Seventeen.m4a";
-                // Only change src if different
-                if (
-                  audioRef.current.src !==
-                  window.location.origin + "/" + randomSong
-                ) {
-                  audioRef.current.src = randomSong;
-                }
-                audioRef.current.play();
+      {/* Manual Play Controls */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => {
+            if (audioRef.current) {
+              const randomSong = "10 A World Alone.m4a";
+              if (
+                audioRef.current.src !==
+                window.location.origin + "/" + randomSong
+              ) {
+                audioRef.current.src = randomSong;
               }
-            }}
-            className="px-4 py-2 bg-green-500 text-white rounded-md font-mono"
-          >
-            Play Music
-          </button>
-          <button
-            onClick={() => audioRef.current?.pause()}
-            className="px-4 py-2 bg-red-500 text-white rounded-md ml-2 font-mono"
-          >
-            Pause Music
-          </button>
-        </div>
+              audioRef.current.play();
+            }
+          }}
+          className="px-4 py-2 bg-green-500 text-white rounded-md font-mono"
+        >
+          Play Music
+        </button>
+        <button
+          onClick={() => audioRef.current?.pause()}
+          className="px-4 py-2 bg-red-500 text-white rounded-md ml-2 font-mono"
+        >
+          Pause Music
+        </button>
+      </div>
 
-        {/* Masonry Grid */}
+      {/* RECTANGLE INSTAGRAM GRID:
+        - Fixed strict 3-columns across ALL device screens (grid-cols-3)
+        - Changed aspect-square to aspect-[2/3] for a beautiful tall portrait rectangle look
+      */}
+      <div className="grid grid-cols-3 gap-[3px] pt-4 px-[3px] pb-[3px] max-w-4xl mx-auto">
         {images.map((src, index) => (
           <div
             key={index}
-            className="masonry-item overflow-hidden cursor-pointer relative group"
+            className="aspect-[2/3] overflow-hidden cursor-pointer relative bg-gray-100"
             onClick={() => openModal(index)}
           >
             <img
               src={src}
-              alt={`Pinterest Image ${index + 1}`}
-              className="w-full h-auto object-cover"
+              alt={`Instagram Grid Image ${index + 1}`}
+              className="w-full h-full object-cover active:opacity-80 transition-opacity"
             />
             {index === 0 && (
-              <div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-0.5 m-1 text-xs font-mono rounded-md">
+              <div className="absolute top-0 left-0 bg-black bg-opacity-60 text-white p-1 m-1 text-[10px] font-mono rounded">
                 click me :)
               </div>
             )}
@@ -164,15 +163,27 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Modal for image preview */}
+      {/* INSTAGRAM MODAL VIEW */}
       {modalOpen && modalIndex !== null && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
           onClick={closeModal}
         >
+          {/* Top navigation header for standard mobile overlay feel */}
+          <div className="absolute top-0 w-full flex justify-between items-center px-4 py-4 text-white font-mono text-sm z-10 bg-gradient-to-b from-black/50 to-transparent">
+            <span>
+              {modalIndex + 1} / {images.length}
+            </span>
+            <button
+              onClick={closeModal}
+              className="text-2xl font-sans p-1 leading-none hover:text-gray-300"
+            >
+              &#10005;
+            </button>
+          </div>
+
           <div
-            className="relative flex flex-col items-center justify-center"
-            style={{ maxWidth: "90vw", maxHeight: "90vh" }}
+            className="relative w-full max-w-2xl flex flex-col items-center justify-center px-2"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => {
               if (e.touches.length === 1) {
@@ -193,31 +204,28 @@ export default function Home() {
               }
             }}
           >
+            {/* The Image scales up natively to fit the container bounds while preserving aspect ratio */}
             <img
               src={images[modalIndex]}
-              alt={`Large Pinterest Image ${modalIndex + 1}`}
-              className="max-w-full max-h-[80vh] rounded shadow-lg mb-4"
+              alt={`Large View Image ${modalIndex + 1}`}
+              className="max-w-full max-h-[75vh] object-contain select-none shadow-2xl"
             />
-            <div className="flex items-center justify-center gap-2 mt-1">
+
+            {/* Navigation buttons */}
+            <div className="flex items-center justify-center gap-6 mt-6 w-full">
               <button
                 onClick={showPrev}
                 disabled={modalIndex === 0}
-                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
+                className="px-4 py-2 bg-neutral-900 text-white border border-neutral-800 disabled:opacity-30 rounded-full hover:bg-neutral-800 font-mono transition"
               >
-                &#8592;
-              </button>
-              <button
-                onClick={closeModal}
-                className="px-3 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
-              >
-                &#10005;
+                &#8592; Prev
               </button>
               <button
                 onClick={showNext}
                 disabled={modalIndex === images.length - 1}
-                className="px-2 py-2 bg-black text-white rounded hover:bg-gray-900 font-mono"
+                className="px-4 py-2 bg-neutral-900 text-white border border-neutral-800 disabled:opacity-30 rounded-full hover:bg-neutral-800 font-mono transition"
               >
-                &#8594;
+                Next &#8594;
               </button>
             </div>
           </div>

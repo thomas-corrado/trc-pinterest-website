@@ -31,7 +31,7 @@ export default function Home() {
   useEffect(() => {
     // UPDATED: Now targeting the newly converted .webp images instead of .jpeg
     const generatedImages = Array.from(
-      { length: 120 },
+      { length: 121 },
       (_, i) => `/trc-pinterest-${i + 1}.webp`,
     );
     setImages(generatedImages);
@@ -119,7 +119,7 @@ export default function Home() {
         <button
           onClick={() => {
             if (audioRef.current) {
-              const randomSong = "10 A World Alone.m4a";
+              const randomSong = "12 glow.m4a";
               if (
                 audioRef.current.src !==
                 window.location.origin + "/" + randomSong

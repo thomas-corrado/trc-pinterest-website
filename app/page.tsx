@@ -31,7 +31,7 @@ export default function Home() {
   useEffect(() => {
     // UPDATED: Now targeting the newly converted .webp images instead of .jpeg
     const generatedImages = Array.from(
-      { length: 124 },
+      { length: 123 },
       (_, i) => `/trc-pinterest-${i + 1}.webp`,
     );
     setImages(generatedImages);

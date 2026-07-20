@@ -11,7 +11,10 @@ export async function GET() {
       );
     });
     return NextResponse.json(sortedBlobs.map((b) => b.url));
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
+  } catch (_error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

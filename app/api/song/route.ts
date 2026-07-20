@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 const DEFAULT_SONG = "/songs/01 Baxter (These Are My Friends).m4a";
 
-// 1. GET: Fetch the currently active song for visitors
 export async function GET() {
   try {
     const { blobs } = await list({ prefix: "active-song.json" });
@@ -15,12 +14,10 @@ export async function GET() {
     const data = await res.json();
     return NextResponse.json(data);
   } catch {
-    // FIX: Removed '_error' variable entirely to satisfy ESLint
     return NextResponse.json({ song: DEFAULT_SONG });
   }
 }
 
-// 2. POST: Update the active song from your Admin panel
 export async function POST(request: Request) {
   try {
     const { song, secretToken } = await request.json();
@@ -29,14 +26,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // FIX: Added `allowOverwrite: true` to permit replacing active-song.json
     await put("active-song.json", JSON.stringify({ song }), {
       access: "public",
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
 
     return NextResponse.json({ success: true, song });
-  } catch {
-    // FIX: Removed '_error' variable entirely to satisfy ESLint
+  } catch (error) {
+    // Log the exact error to Vercel Functions Logs for debugging
+    console.error("FAILED TO UPDATE SONG:", error);
+
     return NextResponse.json(
       { error: "Failed to update song" },
       { status: 500 },

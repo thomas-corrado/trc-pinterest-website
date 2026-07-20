@@ -12,12 +12,17 @@ export async function GET() {
       const numA = parseInt(a.pathname.match(/\d+/)?.[0] || "0", 10);
       const numB = parseInt(b.pathname.match(/\d+/)?.[0] || "0", 10);
 
-      // If both files have numbers (like trc-pinterest-123 and trc-pinterest-122)
+      // If both files have numbers (your old local files)
       if (numA && numB) {
-        return numB - numA; // High numbers (newest) first
+        return numA - numB; // Low numbers (trc-pinterest-1) first
       }
 
-      // Fallback to upload time for new phone pictures
+      // If one is an old file and one is a new phone upload,
+      // put the new phone upload at the top
+      if (numA && !numB) return 1; // 'a' is old, 'b' is new -> move 'b' up
+      if (!numA && numB) return -1; // 'a' is new, 'b' is old -> move 'a' up
+
+      // If both are new phone pictures, sort by newest upload time first
       return (
         new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
       );

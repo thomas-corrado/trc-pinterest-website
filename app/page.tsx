@@ -11,12 +11,12 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const swipeStartX = useRef<number | null>(null);
 
-  const quotes = [
-    `“‘It’s all completely perfect,’ the story will say. ‘It’s just like it is in the pictures.’”\n- Vincenzo Latronico, Perfection`,
-  ];
-
   useEffect(() => {
-    // 1. Fetch images array from Vercel Blob
+    // Moving this inside satisfies the dependency checker completely
+    const quotes = [
+      `“‘It’s all completely perfect,’ the story will say. ‘It’s just like it is in the pictures.’”\n- Vincenzo Latronico, Perfection`,
+    ];
+
     fetch("/api/images")
       .then((res) => res.json())
       .then((data) => {
@@ -28,13 +28,11 @@ export default function Home() {
       })
       .catch((err) => console.error("Error loading images:", err));
 
-    // 2. Fetch the globally selected soundtrack configuration dynamically
     fetch("/api/song")
       .then((res) => res.json())
       .then((data) => {
         if (data.song && audioRef.current) {
           audioRef.current.src = data.song;
-          // Attempt playback once source file is attached
           audioRef.current.play().catch((err) => {
             console.warn(
               "Autoplay blocked by browser. Waiting for explicit user click:",
@@ -45,9 +43,8 @@ export default function Home() {
       })
       .catch((err) => console.error("Error loading sync soundtrack:", err));
 
-    // 3. Set standard static quote layout
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-  }, []);
+  }, []); // Empty dependency array is perfectly safe now
 
   // Navigation handlers
   const openModal = (index: number) => {
@@ -105,15 +102,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [modalOpen, modalIndex]);
-
-  if (images.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600 text-lg font-mono">Loading...</p>
-      </div>
-    );
-  }
+  }, [modalOpen, modalIndex, showNext, showPrev]); // FIX: Added missing dependencies here
 
   return (
     <>

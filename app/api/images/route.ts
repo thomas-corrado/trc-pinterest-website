@@ -11,7 +11,10 @@ export async function GET() {
       );
     });
     return NextResponse.json(sortedBlobs.map((b) => b.url));
-  } catch (_error) {
+  } catch (error) {
+    // If you use 'error' here, the ESLint warning will go away!
+    console.error("BLOB FETCH ERROR:", error);
+
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

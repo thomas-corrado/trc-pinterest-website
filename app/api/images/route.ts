@@ -5,12 +5,24 @@ export async function GET() {
   try {
     const response = await list();
 
-    const sortedBlobs = response.blobs.sort((a, b) => {
-      // 1. Check if the file belongs to your original archive prefix
+    // 1. FILTER: Only keep actual image files (ignore active-song.json or other configs)
+    const imageBlobs = response.blobs.filter((blob) => {
+      const pathname = blob.pathname.toLowerCase();
+      return (
+        pathname.endsWith(".webp") ||
+        pathname.endsWith(".jpg") ||
+        pathname.endsWith(".jpeg") ||
+        pathname.endsWith(".png") ||
+        pathname.endsWith(".gif") ||
+        pathname.endsWith(".heic")
+      );
+    });
+
+    // 2. SORT: Apply the existing sorting logic to the filtered image array
+    const sortedBlobs = imageBlobs.sort((a, b) => {
       const isOldA = a.pathname.startsWith("trc-pinterest-");
       const isOldB = b.pathname.startsWith("trc-pinterest-");
 
-      // 2. Extract numbers ONLY if it's an authentic old file
       const numA = isOldA
         ? parseInt(a.pathname.match(/\d+/)?.[0] || "0", 10)
         : 0;
@@ -18,19 +30,18 @@ export async function GET() {
         ? parseInt(b.pathname.match(/\d+/)?.[0] || "0", 10)
         : 0;
 
-      // Rule A: If both are new uploads, sort by newest date first
+      // Both new uploads -> newest date first
       if (!isOldA && !isOldB) {
         return (
           new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
         );
       }
 
-      // Rule B: If one is a new upload and one is an old archive file,
-      // push the new upload to the top (meaning 'a' goes up if it's new)
+      // One new, one old -> new goes on top
       if (!isOldA && isOldB) return -1;
       if (isOldA && !isOldB) return 1;
 
-      // Rule C: If both are old files, sort them ascending (1 at the top, 123 at bottom)
+      // Both old files -> numeric ascending
       return numA - numB;
     });
 

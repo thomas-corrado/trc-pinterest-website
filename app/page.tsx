@@ -30,11 +30,10 @@ export default function Home() {
 
   useEffect(() => {
     // UPDATED: Now targeting the newly converted .webp images instead of .jpeg
-    const generatedImages = Array.from(
-      { length: 123 },
-      (_, i) => `/trc-pinterest-${i + 1}.webp`,
-    );
-    setImages(generatedImages);
+    fetch("/api/images")
+      .then((res) => res.json())
+      .then((data) => setImages(data))
+      .catch((err) => console.error("Error loading images:", err));
 
     // Pick a random quote
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);

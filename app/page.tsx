@@ -67,6 +67,33 @@ export default function Home() {
       setModalIndex(modalIndex + 1);
   };
 
+  const handleDelete = async (url: string) => {
+    const password = prompt("Enter admin password to delete this image:");
+    if (!password) return;
+
+    if (confirm("Are you sure you want to permanently delete this photo?")) {
+      try {
+        const res = await fetch("/api/images/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, secretToken: password }),
+        });
+
+        if (res.ok) {
+          // Remove the deleted image from your active state array locally
+          setImages((prev) => prev.filter((img) => img !== url));
+          closeModal();
+          alert("Photo successfully deleted.");
+        } else {
+          alert("Incorrect password or deletion failed.");
+        }
+      } catch (err) {
+        console.error("Error deleting image:", err);
+        alert("An error occurred while deleting.");
+      }
+    }
+  };
+
   // Close modal on Escape key
   React.useEffect(() => {
     if (!modalOpen) return;
@@ -178,12 +205,26 @@ export default function Home() {
             <span>
               {modalIndex + 1} / {images.length}
             </span>
-            <button
-              onClick={closeModal}
-              className="text-2xl font-sans p-1 leading-none hover:text-gray-300"
-            >
-              &#10005;
-            </button>
+
+            <div className="flex items-center gap-4">
+              {/* NEW DELETE BUTTON */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // <-- FIX: Stops the modal from instantly closing!
+                  handleDelete(images[modalIndex]);
+                }}
+                className="text-xs bg-red-600/80 hover:bg-red-600 px-3 py-1 rounded text-white font-mono transition"
+              >
+                Delete
+              </button>
+
+              <button
+                onClick={closeModal}
+                className="text-2xl font-sans p-1 leading-none hover:text-gray-300"
+              >
+                &#10005;
+              </button>
+            </div>
           </div>
 
           <div

@@ -5,38 +5,39 @@ export async function GET() {
   try {
     const response = await list();
 
-    // Sort logic: Phone pictures float to the top; old files sort from 1 to 123
     const sortedBlobs = response.blobs.sort((a, b) => {
-      const numA = parseInt(a.pathname.match(/\d+/)?.[0] || "0", 10);
-      const numB = parseInt(b.pathname.match(/\d+/)?.[0] || "0", 10);
+      // 1. Check if the file belongs to your original archive prefix
+      const isOldA = a.pathname.startsWith("trc-pinterest-");
+      const isOldB = b.pathname.startsWith("trc-pinterest-");
 
-      // 1. If both are new phone uploads (neither has a number in the filename)
-      // Sort them by newest upload date first
-      if (!numA && !numB) {
+      // 2. Extract numbers ONLY if it's an authentic old file
+      const numA = isOldA
+        ? parseInt(a.pathname.match(/\d+/)?.[0] || "0", 10)
+        : 0;
+      const numB = isOldB
+        ? parseInt(b.pathname.match(/\d+/)?.[0] || "0", 10)
+        : 0;
+
+      // Rule A: If both are new uploads, sort by newest date first
+      if (!isOldA && !isOldB) {
         return (
           new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
         );
       }
 
-      // 2. If one is a phone upload and one is an old file:
-      // We want the phone upload (the one with NO number) to float to the top
-      if (!numA && numB) return -1; // 'a' is a phone upload, move it up
-      if (numA && !numB) return 1; // 'b' is a phone upload, move it up
+      // Rule B: If one is a new upload and one is an old archive file,
+      // push the new upload to the top (meaning 'a' goes up if it's new)
+      if (!isOldA && isOldB) return -1;
+      if (isOldA && !isOldB) return 1;
 
-      // 3. If both are old files (both have numbers)
-      // Sort them in ascending order (trc-pinterest-1 at the top, 123 at the bottom)
+      // Rule C: If both are old files, sort them ascending (1 at the top, 123 at bottom)
       return numA - numB;
     });
 
-    // Map out the public URLs from our sorted blobs array
     const imageUrls = sortedBlobs.map((b) => b.url);
-
-    // Return the array to the client-side frontend
     return NextResponse.json(imageUrls);
   } catch (error) {
-    // Logging the error clears the ESLint unused-var rule
     console.error("BLOB FETCH ERROR:", error);
-
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

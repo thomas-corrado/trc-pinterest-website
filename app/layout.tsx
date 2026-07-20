@@ -1,5 +1,6 @@
 import React from "react";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "trc",
@@ -16,7 +17,10 @@ export default function RootLayout({
         {/* Favicon Link */}
         <link rel="icon" href="/daniel-defoe.jpeg" />
       </head>
-      <body className="bg-gray-100">{children}</body>
+      <body className="bg-gray-100">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

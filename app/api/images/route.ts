@@ -11,7 +11,7 @@ export async function GET() {
       );
     });
     return NextResponse.json(sortedBlobs.map((b) => b.url));
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
   }
 }

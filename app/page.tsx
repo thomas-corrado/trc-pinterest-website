@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 
 export default function Home() {
@@ -57,14 +57,14 @@ export default function Home() {
     setModalIndex(null);
   };
 
-  const showPrev = () => {
+  const showPrev = useCallback(() => {
     if (modalIndex !== null && modalIndex > 0) setModalIndex(modalIndex - 1);
-  };
+  }, [modalIndex]);
 
-  const showNext = () => {
+  const showNext = useCallback(() => {
     if (modalIndex !== null && modalIndex < images.length - 1)
       setModalIndex(modalIndex + 1);
-  };
+  }, [modalIndex, images.length]);
 
   const handleDelete = async (url: string) => {
     const password = prompt("Enter admin password to delete this image:");

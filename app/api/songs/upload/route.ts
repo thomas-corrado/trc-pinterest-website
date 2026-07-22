@@ -9,7 +9,6 @@ export async function POST(request: Request): Promise<NextResponse> {
       body,
       request,
       onBeforeGenerateToken: async () => {
-        // Here you can check authentication if needed
         return {
           allowedContentTypes: [
             "audio/mpeg",
@@ -21,7 +20,8 @@ export async function POST(request: Request): Promise<NextResponse> {
           tokenPayload: JSON.stringify({}),
         };
       },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
+      // FIX: Removed 'tokenPayload' to satisfy ESLint unused variable check
+      onUploadCompleted: async ({ blob }) => {
         console.log("Audio upload completed successfully:", blob.url);
       },
     });

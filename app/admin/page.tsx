@@ -57,7 +57,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    fetch("/api/song")
+    fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
         if (data.song) setSelectedSong(data.song);
@@ -82,7 +82,7 @@ export default function AdminPage() {
     setSavingSong(true);
 
     try {
-      const res = await fetch("/api/song", {
+      const res = await fetch("/api/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ song: newSongFile, secretToken: password }),

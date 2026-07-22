@@ -28,7 +28,7 @@ export default function Home() {
       })
       .catch((err) => console.error("Error loading images:", err));
 
-    fetch("/api/song")
+    fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
         if (data.song && audioRef.current) {

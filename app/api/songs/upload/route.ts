@@ -1,37 +1,36 @@
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
+  const body = (await request.json()) as HandleUploadBody;
+
   try {
-    const { searchParams } = new URL(request.url);
-    const filename = searchParams.get("filename");
-
-    // 1. Authenticate with Bearer Token header
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-
-    if (token !== process.env.ADMIN_SECRET_TOKEN) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (!filename || !request.body) {
-      return NextResponse.json(
-        { error: "Missing file or filename" },
-        { status: 400 },
-      );
-    }
-
-    // 2. Upload file binary into a 'songs/' blob prefix
-    const blob = await put(`songs/${filename}`, request.body, {
-      access: "public",
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        // Here you can check authentication if needed
+        return {
+          allowedContentTypes: [
+            "audio/mpeg",
+            "audio/mp4",
+            "audio/x-m4a",
+            "audio/m4a",
+            "audio/*",
+          ],
+          tokenPayload: JSON.stringify({}),
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        console.log("Audio upload completed successfully:", blob.url);
+      },
     });
 
-    return NextResponse.json(blob);
+    return NextResponse.json(jsonResponse);
   } catch (error) {
-    console.error("SONG UPLOAD ERROR:", error);
     return NextResponse.json(
-      { error: "Failed to upload song" },
-      { status: 500 },
+      { error: (error as Error).message },
+      { status: 400 },
     );
   }
 }

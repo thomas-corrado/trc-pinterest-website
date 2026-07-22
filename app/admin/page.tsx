@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { upload } from "@vercel/blob/client";
 
 // Local fallback audio tracks from /public/songs
 const LOCAL_SONGS = [
@@ -141,7 +142,7 @@ export default function AdminPage() {
     }
   };
 
-  // Handler: Upload new audio file
+  // Handler: Upload new audio file directly to Vercel Blob
   const handleSongUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!songFile) {
@@ -150,37 +151,30 @@ export default function AdminPage() {
     }
 
     setUploadingSong(true);
-    setSongStatus("Uploading audio track...");
+    setSongStatus("Uploading audio track directly...");
 
     try {
       const cleanName = `${Date.now()}-${songFile.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-      const response = await fetch(`/api/songs/upload?filename=${cleanName}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${password}` },
-        body: songFile,
+
+      // Upload directly from browser to Blob store (bypasses 4.5MB limit)
+      const newBlob = await upload(`songs/${cleanName}`, songFile, {
+        access: "public",
+        handleUploadUrl: "/api/songs/upload",
       });
 
-      if (response.ok) {
-        const uploadedBlob = await response.json();
-        setSongStatus("Success! Song uploaded.");
-        setSongFile(null);
+      setSongStatus("Success! Song uploaded.");
+      setSongFile(null);
 
-        const newTrack = {
-          title: cleanName.replace(/_/g, " "),
-          file: uploadedBlob.url,
-        };
-        setDynamicSongs((prev) => [...prev, newTrack]);
+      const newTrack = {
+        title: cleanName.replace(/_/g, " "),
+        file: newBlob.url,
+      };
+      setDynamicSongs((prev) => [...prev, newTrack]);
 
-        const audioInput = document.getElementById(
-          "song-file-input",
-        ) as HTMLInputElement;
-        if (audioInput) audioInput.value = "";
-      } else {
-        const errData = await response.json();
-        setSongStatus(
-          `Audio upload failed: ${errData.error || "Incorrect password"}`,
-        );
-      }
+      const audioInput = document.getElementById(
+        "song-file-input",
+      ) as HTMLInputElement;
+      if (audioInput) audioInput.value = "";
     } catch (error) {
       console.error(error);
       setSongStatus("An error occurred during audio upload.");

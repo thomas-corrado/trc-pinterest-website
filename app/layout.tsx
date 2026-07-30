@@ -2,7 +2,10 @@ import React from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "trc",
+  title: {
+    default: "trc",
+    template: "%s | trc",
+  },
 };
 
 export default function RootLayout({

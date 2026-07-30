@@ -51,14 +51,26 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const event = await getEvent(slug);
+
+  let event: EventItem | null = null;
+  try {
+    event = await getEvent(slug);
+  } catch (err) {
+    console.error(`generateMetadata error for slug ${slug}:`, err);
+  }
+
   const url = await buildEventUrl(slug);
 
   if (!event) {
     return {
       title: "Event Not Found",
+      description: "Event details could not be loaded.",
     };
   }
+
+  const absoluteFlyerUrl = event.flyerUrl.startsWith("http")
+    ? event.flyerUrl
+    : `${url}${event.flyerUrl}`;
 
   return {
     title: event.title,
@@ -67,10 +79,13 @@ export async function generateMetadata({
       title: event.title,
       description: event.description,
       url,
+      type: "website",
       images: [
         {
-          url: event.flyerUrl,
+          url: absoluteFlyerUrl,
           alt: `${event.title} flyer`,
+          width: 1200,
+          height: 630,
         },
       ],
     },
@@ -78,7 +93,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: event.title,
       description: event.description,
-      images: [event.flyerUrl],
+      images: [absoluteFlyerUrl],
     },
   };
 }

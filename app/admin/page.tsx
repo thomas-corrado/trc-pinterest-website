@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { upload } from "@vercel/blob/client";
 
-// Local fallback audio tracks from /public/songs
 const LOCAL_SONGS = [
   {
     title: "Baxter (These Are My Friends)",
@@ -39,10 +38,10 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Photo State
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("");
-  const [uploading, setUploading] = useState(false);
+  // Bulk Photos State
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [photoStatus, setPhotoStatus] = useState("");
 
   // Audio State
   const [songFile, setSongFile] = useState<File | null>(null);
@@ -54,10 +53,10 @@ export default function AdminPage() {
     Array<{ title: string; file: string }>
   >([]);
 
-  // Fetch active song & uploaded song list once authenticated
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    // Load music options
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
@@ -72,9 +71,7 @@ export default function AdminPage() {
   // Unlock Handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.trim().length > 0) {
-      setIsAuthenticated(true);
-    }
+    if (password.trim().length > 0) setIsAuthenticated(true);
   };
 
   // Handler: Change active soundtrack
@@ -89,74 +86,84 @@ export default function AdminPage() {
         body: JSON.stringify({ song: newSongFile, secretToken: password }),
       });
 
-      if (res.ok) {
-        alert("Active song updated for all visitors!");
-      } else {
-        alert("Failed to update song. Incorrect password.");
-      }
+      if (res.ok) alert("Active song updated!");
+      else alert("Failed to update song. Check password.");
     } catch (err) {
-      console.error("Song change error:", err);
-      alert("An error occurred while changing the song.");
+      console.error(err);
+      alert("Error updating song.");
     } finally {
       setSavingSong(false);
     }
   };
 
-  // Handler: Upload new photo
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) {
-      setStatus("Please select an image file first.");
-      return;
-    }
-
-    setUploading(true);
-    setStatus("Uploading photo...");
-
-    try {
-      const cleanName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-      const response = await fetch(`/api/upload?filename=${cleanName}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${password}` },
-        body: file,
-      });
-
-      if (response.ok) {
-        setStatus("Success! Photo published successfully.");
-        setFile(null);
-        const fileInput = document.getElementById(
-          "file-input",
-        ) as HTMLInputElement;
-        if (fileInput) fileInput.value = "";
-      } else {
-        const errData = await response.json();
-        setStatus(
-          `Upload failed: ${errData.error || "Incorrect password or network error"}`,
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      setStatus("An error occurred during upload.");
-    } finally {
-      setUploading(false);
+  // Handler: Bulk File Selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
     }
   };
 
-  // Handler: Upload new audio file directly to Vercel Blob
-  const handleSongUpload = async (e: React.FormEvent) => {
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handler: Bulk Upload Photos
+  const handleBulkUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!songFile) {
-      setSongStatus("Please select an audio file first.");
-      return;
+    if (selectedFiles.length === 0) return;
+
+    setUploadingPhotos(true);
+    setPhotoStatus(`Uploading 0 / ${selectedFiles.length}...`);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      setPhotoStatus(`Uploading image ${i + 1} of ${selectedFiles.length}...`);
+
+      try {
+        const cleanName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+        const response = await fetch(`/api/upload?filename=${cleanName}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${password}` },
+          body: file,
+        });
+
+        if (response.ok) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        console.error("Error uploading file:", file.name, error);
+        failCount++;
+      }
     }
 
+    setUploadingPhotos(false);
+
+    if (failCount === 0) {
+      setPhotoStatus(`Success! Published all ${successCount} photos.`);
+      setSelectedFiles([]);
+    } else {
+      setPhotoStatus(
+        `Finished with issues: ${successCount} uploaded, ${failCount} failed.`,
+      );
+    }
+  };
+
+  // Handler: Upload Audio
+  const handleSongUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!songFile) return;
+
     setUploadingSong(true);
-    setSongStatus("Uploading audio track directly...");
+    setSongStatus("Uploading audio...");
 
     try {
       const cleanName = `${Date.now()}-${songFile.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-
-      // Upload directly from browser to Blob store (bypasses 4.5MB limit)
       const newBlob = await upload(`songs/${cleanName}`, songFile, {
         access: "public",
         handleUploadUrl: "/api/songs/upload",
@@ -164,53 +171,41 @@ export default function AdminPage() {
 
       setSongStatus("Success! Song uploaded.");
       setSongFile(null);
-
-      const newTrack = {
-        title: cleanName.replace(/_/g, " "),
-        file: newBlob.url,
-      };
-      setDynamicSongs((prev) => [...prev, newTrack]);
-
-      const audioInput = document.getElementById(
-        "song-file-input",
-      ) as HTMLInputElement;
-      if (audioInput) audioInput.value = "";
+      setDynamicSongs((prev) => [
+        ...prev,
+        { title: cleanName.replace(/_/g, " "), file: newBlob.url },
+      ]);
     } catch (error) {
       console.error(error);
-      setSongStatus("An error occurred during audio upload.");
+      setSongStatus("Error uploading song.");
     } finally {
       setUploadingSong(false);
     }
   };
 
-  // ==========================================
-  // VIEW 1: GATE / PASSWORD LOGIN SCREEN
-  // ==========================================
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 font-mono px-4">
-        <div className="w-full max-w-sm bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h1 className="text-lg font-bold mb-1 text-gray-900">Admin Portal</h1>
-          <p className="text-xs text-gray-500 mb-6">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 font-mono text-white px-4">
+        <div className="w-full max-w-sm bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl space-y-4">
+          <h1 className="text-sm font-bold uppercase tracking-wider text-white">
+            Admin Access
+          </h1>
+          <p className="text-xs text-neutral-400">
             Enter password to access site controls
           </p>
-
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black text-sm"
-                placeholder="••••••••"
-                autoFocus
-                required
-              />
-            </div>
-
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white"
+              placeholder="••••••••"
+              autoFocus
+              required
+            />
             <button
               type="submit"
-              className="w-full py-2 bg-black text-white rounded text-xs font-semibold tracking-wider uppercase hover:bg-gray-800 transition"
+              className="w-full py-2.5 bg-white text-black font-bold text-xs uppercase rounded-lg hover:bg-neutral-200 transition"
             >
               Unlock Dashboard
             </button>
@@ -220,104 +215,150 @@ export default function AdminPage() {
     );
   }
 
-  // ==========================================
-  // VIEW 2: UNLOCKED ADMIN DASHBOARD
-  // ==========================================
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 font-mono px-4 py-8">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
-        {/* Header & Lock Option */}
-        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+    <div className="flex flex-col items-center min-h-screen bg-neutral-950 text-neutral-100 font-mono px-4 py-12">
+      <div className="w-full max-w-xl bg-neutral-900 p-6 rounded-2xl border border-neutral-800 space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-[10px] text-green-600 font-semibold">
+            <h1 className="text-xl font-bold uppercase tracking-wider text-white">
+              Admin Dashboard
+            </h1>
+            <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full inline-block mt-1">
               ● Session Unlocked
-            </p>
+            </span>
           </div>
           <button
             onClick={() => setIsAuthenticated(false)}
-            className="text-xs text-gray-400 hover:text-black underline"
+            className="text-xs text-neutral-400 hover:text-white underline transition"
           >
             Lock
           </button>
         </div>
 
-        {/* Photo Upload Section */}
-        <div>
-          <h2 className="text-xs font-bold uppercase text-gray-500 mb-3">
-            1. Upload Photo
+        {/* SECTION: BULK PHOTO UPLOAD */}
+        <div className="space-y-3 text-xs">
+          <h2 className="font-bold text-sm uppercase text-white border-b border-neutral-800 pb-2">
+            1. Bulk Upload Photos to Grid
           </h2>
-          <form onSubmit={handleUpload} className="space-y-4">
-            <input
-              id="file-input"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full text-xs text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 cursor-pointer"
-              required
-            />
+          <form onSubmit={handleBulkUpload} className="space-y-4">
+            <div className="border border-dashed border-neutral-800 hover:border-neutral-700 p-6 rounded-xl text-center bg-neutral-950/50 transition">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                id="bulk-photo-input"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <label
+                htmlFor="bulk-photo-input"
+                className="cursor-pointer text-xs font-semibold text-white block space-y-1"
+              >
+                <p>Click to select photos (Multiple allowed)</p>
+                <p className="text-[10px] text-neutral-500 font-normal">
+                  PNG, JPG, WEBP, GIF
+                </p>
+              </label>
+            </div>
+
+            {/* Selected File Previews */}
+            {selectedFiles.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-neutral-400 text-[11px]">
+                  <span>Selected Photos ({selectedFiles.length})</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFiles([])}
+                    className="text-[10px] text-red-400 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1 bg-neutral-950 rounded-xl border border-neutral-800">
+                  {selectedFiles.map((f, idx) => (
+                    <div
+                      key={idx}
+                      className="relative aspect-square bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800"
+                    >
+                      <img
+                        src={URL.createObjectURL(f)}
+                        alt={f.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(idx)}
+                        className="absolute top-1 right-1 bg-black/80 hover:bg-red-900 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={uploading}
-              className="w-full py-2 bg-black text-white rounded text-xs font-semibold tracking-wider uppercase hover:bg-gray-800 transition disabled:opacity-50"
+              disabled={uploadingPhotos || selectedFiles.length === 0}
+              className="w-full py-3 bg-white text-black font-bold uppercase rounded-lg text-xs hover:bg-neutral-200 transition disabled:opacity-50"
             >
-              {uploading ? "Uploading..." : "Publish Photo"}
+              {uploadingPhotos
+                ? "Uploading..."
+                : `Publish ${selectedFiles.length} Photo${selectedFiles.length === 1 ? "" : "s"}`}
             </button>
           </form>
-          {status && (
-            <p className="mt-3 text-xs text-center font-medium text-gray-700 bg-gray-100 p-2 rounded">
-              {status}
+
+          {photoStatus && (
+            <p className="mt-2 text-xs text-center font-medium text-emerald-400 bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
+              {photoStatus}
             </p>
           )}
         </div>
 
-        <hr className="border-gray-200" />
+        <hr className="border-neutral-800" />
 
-        {/* Audio Track Upload Section */}
-        <div>
-          <h2 className="text-xs font-bold uppercase text-gray-500 mb-3">
-            2. Upload New Song
+        {/* SECTION: AUDIO UPLOAD */}
+        <div className="space-y-3 text-xs">
+          <h2 className="font-bold text-sm uppercase text-white border-b border-neutral-800 pb-2">
+            2. Upload New Song File
           </h2>
           <form onSubmit={handleSongUpload} className="space-y-4">
             <input
-              id="song-file-input"
               type="file"
               accept="audio/m4a,audio/mp3,audio/*"
               onChange={(e) => setSongFile(e.target.files?.[0] || null)}
-              className="w-full text-xs text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 cursor-pointer"
-              required
+              className="w-full text-xs text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700 cursor-pointer"
             />
             <button
               type="submit"
               disabled={uploadingSong}
-              className="w-full py-2 bg-neutral-800 text-white rounded text-xs font-semibold tracking-wider uppercase hover:bg-black transition disabled:opacity-50"
+              className="w-full py-3 bg-white text-black font-bold uppercase rounded-lg text-xs hover:bg-neutral-200 transition disabled:opacity-50"
             >
               {uploadingSong ? "Uploading Audio..." : "Save Song to Blob"}
             </button>
           </form>
           {songStatus && (
-            <p className="mt-3 text-xs text-center font-medium text-gray-700 bg-gray-100 p-2 rounded">
+            <p className="mt-2 text-xs text-center font-medium text-emerald-400 bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
               {songStatus}
             </p>
           )}
         </div>
 
-        <hr className="border-gray-200" />
+        <hr className="border-neutral-800" />
 
-        {/* Soundtrack Selector Section */}
-        <div>
-          <h2 className="text-xs font-bold uppercase text-gray-500 mb-1">
-            3. Select Active Soundtrack
+        {/* SECTION: MAIN SITE SOUNDTRACK */}
+        <div className="space-y-3 text-xs">
+          <h2 className="font-bold text-sm uppercase text-white border-b border-neutral-800 pb-2">
+            3. Main Site Active Soundtrack
           </h2>
-          <p className="text-[10px] text-gray-400 mb-3">
-            Applies immediately to site visitors
-          </p>
-
           <select
             value={selectedSong}
             onChange={(e) => handleSongChange(e.target.value)}
             disabled={savingSong}
-            className="w-full bg-white border border-gray-300 p-2 text-xs rounded text-black focus:outline-none focus:border-black cursor-pointer disabled:opacity-50"
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-white cursor-pointer disabled:opacity-50"
           >
             <option value="">Choose active track...</option>
             {allAvailableSongs.map((track) => (

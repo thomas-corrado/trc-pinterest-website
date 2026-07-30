@@ -6,15 +6,17 @@ export async function GET() {
     const response = await list();
 
     // 1. FILTER: Only keep actual image files (ignore active-song.json or other configs)
+    //    Exclude event flyers stored under the events/ folder so they don't appear on the front page.
     const imageBlobs = response.blobs.filter((blob) => {
       const pathname = blob.pathname.toLowerCase();
       return (
-        pathname.endsWith(".webp") ||
-        pathname.endsWith(".jpg") ||
-        pathname.endsWith(".jpeg") ||
-        pathname.endsWith(".png") ||
-        pathname.endsWith(".gif") ||
-        pathname.endsWith(".heic")
+        !pathname.startsWith("events/") &&
+        (pathname.endsWith(".webp") ||
+          pathname.endsWith(".jpg") ||
+          pathname.endsWith(".jpeg") ||
+          pathname.endsWith(".png") ||
+          pathname.endsWith(".gif") ||
+          pathname.endsWith(".heic"))
       );
     });
 

@@ -161,7 +161,7 @@ export default function EventsFeedPage() {
     setUploadingFlyer(true);
 
     try {
-      const cleanName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+      const cleanName = `events/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
       const response = await fetch(`/api/upload?filename=${cleanName}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -348,35 +348,7 @@ export default function EventsFeedPage() {
                       )}
                     </div>
 
-                    {/* Stacked Details Rows: Date, Time, Location */}
-                    <div className="pt-3 border-t border-slate-200 space-y-1.5 text-[11px] text-slate-500">
-                      {event.date && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400 uppercase text-[9px]">
-                            Date
-                          </span>
-                          <span>{event.date}</span>
-                        </div>
-                      )}
-                      {event.time && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400 uppercase text-[9px]">
-                            Time
-                          </span>
-                          <span>{event.time}</span>
-                        </div>
-                      )}
-                      {event.location && (
-                        <div className="pt-1 border-t border-slate-200">
-                          <span className="text-slate-400 uppercase text-[9px] block mb-0.5">
-                            Location
-                          </span>
-                          <span className="text-slate-900 break-words block">
-                            {event.location}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+
                   </div>
                 </Link>
 

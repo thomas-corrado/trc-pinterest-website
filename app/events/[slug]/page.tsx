@@ -91,8 +91,7 @@ export default function SingleEventPage({
         return {
           title: "You're on the list! 🎉",
           subtitle: "See you there.",
-          containerStyle:
-            "bg-emerald-100 border-emerald-200 text-emerald-700",
+          containerStyle: "bg-emerald-100 border-emerald-200 text-emerald-700",
           subStyle: "text-emerald-700/90",
         };
       case "maybe":
@@ -171,6 +170,24 @@ export default function SingleEventPage({
         <audio ref={audioRef} src={event.activeSong} loop preload="auto" />
       )}
 
+      {/* Global Manual Music Deck */}
+      {event.activeSong && (
+        <div className="fixed bottom-4 right-4 z-50 flex gap-2">
+          <button
+            onClick={toggleMusic}
+            className="px-4 py-2 bg-green-500 text-white rounded-md font-mono text-xs shadow-md transition hover:bg-green-600"
+          >
+            Play Music
+          </button>
+          <button
+            onClick={toggleMusic}
+            className="px-4 py-2 bg-red-500 text-white rounded-md font-mono text-xs shadow-md transition hover:bg-red-600"
+          >
+            Pause Music
+          </button>
+        </div>
+      )}
+
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl space-y-6 pb-8">
         {/* Back Button & Flyer */}
         <div className="relative w-full aspect-[4/3] bg-slate-100 flex items-center justify-center overflow-hidden">
@@ -194,14 +211,6 @@ export default function SingleEventPage({
             </div>
           )}
 
-          {event.activeSong && (
-            <button
-              onClick={toggleMusic}
-              className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 text-[11px] px-3 py-1.5 rounded-full hover:bg-slate-50 transition"
-            >
-              {isPlaying ? "Pause Sound ♫" : "Play Sound ♫"}
-            </button>
-          )}
         </div>
 
         {/* Details & RSVP */}
@@ -218,10 +227,19 @@ export default function SingleEventPage({
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
               <span className="text-slate-500 uppercase font-semibold">
-                Date & Time
+                Date
               </span>
               <span className="text-slate-700 text-right">
-                {event.date} — {event.time}
+                {event.date}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-slate-500 uppercase font-semibold">
+                Time
+              </span>
+              <span className="text-slate-700 text-right">
+                {event.time}
               </span>
             </div>
 

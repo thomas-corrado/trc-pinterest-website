@@ -248,7 +248,7 @@ export default function SingleEventPage({
                 Location
               </span>
               <div className="flex items-center space-x-2">
-                <span className="text-slate-700 text-right truncate max-w-[160px]">
+                <span className="text-slate-700 text-right max-w-[200px]">
                   {event.location}
                 </span>
                 <button

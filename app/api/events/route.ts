@@ -23,6 +23,14 @@ export interface RSVP {
   plusOnes: number;
   note?: string;
   createdAt: string;
+  editToken: string;
+}
+
+function generateEditToken(): string {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 // 1. GET: Fetch events list or specific event + RSVPs
@@ -99,6 +107,7 @@ export async function POST(request: Request) {
       plusOnes: Number(plusOnes) || 0,
       note: note || "",
       createdAt: new Date().toISOString(),
+      editToken: generateEditToken(),
     };
 
     const updatedRsvps = [newEntry, ...currentRsvps];
@@ -114,6 +123,55 @@ export async function POST(request: Request) {
     console.error("Error saving RSVP:", error);
     return NextResponse.json(
       { error: "Failed to submit RSVP." },
+      { status: 500 },
+    );
+  }
+}
+
+// 2b. PATCH: Edit an existing RSVP using its edit token
+export async function PATCH(request: Request) {
+  try {
+    const { slug, editToken, status, plusOnes, note } = await request.json();
+
+    if (!slug || !editToken) {
+      return NextResponse.json(
+        { error: "Missing slug or edit token." },
+        { status: 400 },
+      );
+    }
+
+    const rsvpFileName = `${RSVP_FILE_PREFIX}${slug}.json`;
+    const rsvpBlobs = await list({ prefix: rsvpFileName });
+    let currentRsvps: RSVP[] = [];
+    if (rsvpBlobs.blobs.length > 0) {
+      const res = await fetch(rsvpBlobs.blobs[0].url, { cache: "no-store" });
+      currentRsvps = await res.json();
+    }
+
+    const index = currentRsvps.findIndex((r) => r.editToken === editToken);
+    if (index === -1) {
+      return NextResponse.json(
+        { error: "RSVP not found." },
+        { status: 404 },
+      );
+    }
+
+    if (status) currentRsvps[index].status = status;
+    if (plusOnes !== undefined)
+      currentRsvps[index].plusOnes = Number(plusOnes) || 0;
+    if (note !== undefined) currentRsvps[index].note = note;
+
+    await put(rsvpFileName, JSON.stringify(currentRsvps), {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+
+    return NextResponse.json({ success: true, rsvp: currentRsvps[index] });
+  } catch (error) {
+    console.error("Error updating RSVP:", error);
+    return NextResponse.json(
+      { error: "Failed to update RSVP." },
       { status: 500 },
     );
   }

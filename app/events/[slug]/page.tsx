@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface EventItem {
   slug: string;
@@ -23,6 +24,7 @@ interface RSVP {
   plusOnes: number;
   note?: string;
   createdAt: string;
+  editToken: string;
 }
 
 export default function SingleEventPage({
@@ -47,6 +49,11 @@ export default function SingleEventPage({
     "in" | "out" | "maybe"
   >("in");
   const [copied, setCopied] = useState(false);
+  const [editLinkCopied, setEditLinkCopied] = useState(false);
+
+  const searchParams = useSearchParams();
+  const editToken = searchParams.get("edit");
+  const [isEditing, setIsEditing] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -57,7 +64,21 @@ export default function SingleEventPage({
       .then((data) => {
         if (data.event) {
           setEvent(data.event);
-          setRsvps(data.rsvps || []);
+          const loadedRsvps: RSVP[] = data.rsvps || [];
+          setRsvps(loadedRsvps);
+
+          if (editToken) {
+            const existing = loadedRsvps.find(
+              (r) => r.editToken === editToken,
+            );
+            if (existing) {
+              setName(existing.name);
+              setStatus(existing.status);
+              setPlusOnes(existing.plusOnes);
+              setNote(existing.note || "");
+              setIsEditing(true);
+            }
+          }
         }
         setLoading(false);
       })
@@ -65,7 +86,7 @@ export default function SingleEventPage({
         console.error("Failed to load event details:", err);
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, editToken]);
 
   const handleCopyAddress = () => {
     if (!event?.location) return;
@@ -111,25 +132,61 @@ export default function SingleEventPage({
     }
   };
 
+  const buildEditLink = (token: string) => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}/events/${slug}?edit=${token}`;
+  };
+
+  const handleCopyEditLink = (token: string) => {
+    navigator.clipboard.writeText(buildEditLink(token));
+    setEditLinkCopied(true);
+    setTimeout(() => setEditLinkCopied(false), 2000);
+  };
+
   const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, name, status, plusOnes, note }),
-      });
+      if (isEditing && editToken) {
+        const res = await fetch("/api/events", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug,
+            editToken,
+            status,
+            plusOnes,
+            note,
+          }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setRsvps((prev) => [data.rsvp, ...prev]);
-        setSubmittedStatus(status);
-        setSubmitted(true);
+        if (res.ok) {
+          const data = await res.json();
+          setRsvps((prev) =>
+            prev.map((r) => (r.editToken === editToken ? data.rsvp : r)),
+          );
+          setSubmittedStatus(status);
+          setSubmitted(true);
+        } else {
+          alert("Failed to update RSVP.");
+        }
       } else {
-        alert("Failed to submit RSVP.");
+        const res = await fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug, name, status, plusOnes, note }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setRsvps((prev) => [data.rsvp, ...prev]);
+          setSubmittedStatus(status);
+          setSubmitted(true);
+        } else {
+          alert("Failed to submit RSVP.");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -165,7 +222,7 @@ export default function SingleEventPage({
   const confirmation = getConfirmationMessage(submittedStatus);
 
   return (
-    <div className="min-h-screen bg-gray-100 text-slate-900 font-mono px-4 py-12 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 text-slate-900 font-mono px-4 py-4 flex flex-col items-center">
       {event.activeSong && (
         <audio ref={audioRef} src={event.activeSong} loop preload="auto" />
       )}
@@ -263,7 +320,7 @@ export default function SingleEventPage({
 
           <div className="border-t border-slate-200 pt-6">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
-              RSVP
+              {isEditing ? "Edit RSVP" : "RSVP"}
             </h2>
 
             {event.rsvpLocked ? (
@@ -272,10 +329,26 @@ export default function SingleEventPage({
               </div>
             ) : submitted ? (
               <div
-                className={`text-center py-6 border rounded-xl text-xs space-y-1 ${confirmation.containerStyle}`}
+                className={`text-center py-6 border rounded-xl text-xs space-y-2 ${confirmation.containerStyle}`}
               >
                 <p className="font-bold text-sm">{confirmation.title}</p>
                 <p className={confirmation.subStyle}>{confirmation.subtitle}</p>
+
+                {!isEditing && (
+                  <div className="pt-2 space-y-1">
+                    <p className="text-[10px] opacity-80">
+                      Save this link to edit your RSVP later:
+                    </p>
+                    <button
+                      onClick={() =>
+                        handleCopyEditLink(rsvps[0]?.editToken || "")
+                      }
+                      className="bg-white/80 hover:bg-white text-slate-900 text-[10px] px-3 py-1.5 rounded border border-current opacity-90 transition"
+                    >
+                      {editLinkCopied ? "Copied!" : "Copy Edit Link"}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <form onSubmit={handleRsvpSubmit} className="space-y-4 text-xs">
@@ -350,7 +423,11 @@ export default function SingleEventPage({
                   disabled={submitting}
                   className="w-full py-3 bg-white text-black font-bold uppercase rounded-lg text-xs tracking-wider hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  {submitting ? "Confirming..." : "Submit RSVP"}
+                  {submitting
+                    ? "Confirming..."
+                    : isEditing
+                      ? "Update RSVP"
+                      : "Submit RSVP"}
                 </button>
               </form>
             )}

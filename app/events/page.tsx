@@ -61,10 +61,8 @@ export default function EventsFeedPage() {
     Array<{ title: string; file: string }>
   >([]);
 
-  // Editing vs Creating Trackers
+  // Form State
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
-
-  // Event Form State
   const [newTitle, setNewTitle] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -74,8 +72,6 @@ export default function EventsFeedPage() {
   const [newFlyerUrl, setNewFlyerUrl] = useState("");
   const [newActiveSong, setNewActiveSong] = useState("");
   const [saving, setSaving] = useState(false);
-
-  // File Upload State
   const [uploadingFlyer, setUploadingFlyer] = useState(false);
 
   useEffect(() => {
@@ -84,7 +80,7 @@ export default function EventsFeedPage() {
 
   useEffect(() => {
     if (showEventModal) {
-      fetch("/api/songs")
+      fetch("/api/songs", { cache: "no-store" })
         .then((res) => res.json())
         .then((data) => {
           if (data.uploadedSongs) setDynamicSongs(data.uploadedSongs);
@@ -96,7 +92,8 @@ export default function EventsFeedPage() {
   const allAvailableSongs = [...LOCAL_SONGS, ...dynamicSongs];
 
   const fetchEvents = () => {
-    fetch("/api/events")
+    // Force no-store to ensure freshly created/edited events appear instantly
+    fetch("/api/events", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         setEvents(data.events || []);
@@ -126,7 +123,7 @@ export default function EventsFeedPage() {
   };
 
   const handleOpenEditModal = (event: EventItem, e: React.MouseEvent) => {
-    e.preventDefault(); // Stop navigation to single event page
+    e.preventDefault();
     setEditingSlug(event.slug);
     setNewTitle(event.title);
     setNewSlug(event.slug);
@@ -141,7 +138,6 @@ export default function EventsFeedPage() {
 
   const handleTitleChange = (val: string) => {
     setNewTitle(val);
-    // Auto-generate slug only if creating a new event
     if (!editingSlug) {
       const autoSlug = val
         .toLowerCase()
@@ -209,7 +205,7 @@ export default function EventsFeedPage() {
         body: JSON.stringify({
           secretToken: adminToken,
           newEvent: eventPayload,
-          originalSlug: editingSlug, // Informs backend if this is an update to an existing event
+          originalSlug: editingSlug,
         }),
       });
 
@@ -261,40 +257,40 @@ export default function EventsFeedPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-950 font-mono text-white text-xs">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 font-mono text-slate-900 text-xs">
         Loading events...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-mono px-4 py-12 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 text-slate-900 font-mono px-4 py-8 sm:py-12 flex flex-col items-center">
       <div className="w-full max-w-2xl space-y-8">
-        {/* Header */}
-        <div className="border-b border-neutral-800 pb-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-wider uppercase text-white">
-              Events
+        {/* Header - Fixed layout for mobile screen sizes */}
+        <div className="border-b border-slate-200 pb-4 flex flex-row items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-wider uppercase text-slate-900">
+              EVENTS
             </h1>
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-slate-500">
               Select an event to view details & RSVP
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="shrink-0 pt-0.5">
             {adminToken ? (
               <button
                 onClick={handleOpenCreateModal}
-                className="bg-white text-black font-bold text-xs px-3 py-1.5 rounded-full hover:bg-neutral-200 transition"
+                className="bg-white text-black font-bold text-xs px-3 py-1.5 rounded-full hover:bg-slate-50 transition whitespace-nowrap"
               >
                 ＋ Add Event
               </button>
             ) : (
               <button
                 onClick={() => setShowAdminModal(true)}
-                className="text-xs bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-full text-neutral-400 hover:text-white transition"
+                className="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-full text-slate-900 hover:bg-slate-50 transition whitespace-nowrap flex items-center gap-1.5"
               >
-                🔒 Admin Login
+                <span>🔒</span> <span>Admin Login</span>
               </button>
             )}
           </div>
@@ -302,12 +298,12 @@ export default function EventsFeedPage() {
 
         {/* Card Grid */}
         {events.length === 0 ? (
-          <div className="text-center py-16 bg-neutral-900/50 border border-neutral-800/80 rounded-2xl text-xs text-neutral-500 space-y-3">
+          <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl text-xs text-slate-500 space-y-3 shadow-sm">
             <p>No upcoming events right now.</p>
             {adminToken && (
               <button
                 onClick={handleOpenCreateModal}
-                className="underline text-white font-bold"
+                className="underline text-slate-900 font-bold"
               >
                 Create your first event →
               </button>
@@ -319,9 +315,9 @@ export default function EventsFeedPage() {
               <div key={event.slug} className="relative group">
                 <Link
                   href={`/events/${event.slug}`}
-                  className="bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-2xl overflow-hidden transition duration-200 flex flex-col h-full"
+                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl overflow-hidden transition duration-200 flex flex-col h-full shadow-sm"
                 >
-                  <div className="w-full aspect-[16/9] bg-neutral-800 overflow-hidden relative">
+                  <div className="w-full aspect-[16/9] bg-slate-100 overflow-hidden relative">
                     {event.flyerUrl ? (
                       <img
                         src={event.flyerUrl}
@@ -329,28 +325,55 @@ export default function EventsFeedPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-neutral-600 text-[10px] uppercase tracking-widest">
+                      <div className="w-full h-full flex items-center justify-center text-slate-500 text-[10px] uppercase tracking-widest">
                         [ Flyer Image ]
                       </div>
                     )}
-                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-neutral-300 font-semibold border border-white/10">
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-slate-700 font-semibold border border-slate-200">
                       RSVP Open →
                     </div>
                   </div>
 
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      <h2 className="text-lg font-bold text-white group-hover:text-neutral-200 transition">
+                      <h2 className="text-lg font-bold text-slate-900 group-hover:text-slate-700 transition">
                         {event.title}
                       </h2>
-                      <p className="text-xs text-neutral-400 mt-1 line-clamp-2">
-                        {event.description}
-                      </p>
+                      {event.description && (
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-[11px] text-neutral-400">
-                      <span>{event.date}</span>
-                      <span>{event.time}</span>
+                    {/* Stacked Details Rows: Date, Time, Location */}
+                    <div className="pt-3 border-t border-slate-200 space-y-1.5 text-[11px] text-slate-500">
+                      {event.date && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400 uppercase text-[9px]">
+                            Date
+                          </span>
+                          <span>{event.date}</span>
+                        </div>
+                      )}
+                      {event.time && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400 uppercase text-[9px]">
+                            Time
+                          </span>
+                          <span>{event.time}</span>
+                        </div>
+                      )}
+                      {event.location && (
+                        <div className="pt-1 border-t border-slate-200">
+                          <span className="text-slate-400 uppercase text-[9px] block mb-0.5">
+                            Location
+                          </span>
+                          <span className="text-slate-900 break-words block">
+                            {event.location}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>
@@ -360,13 +383,13 @@ export default function EventsFeedPage() {
                   <div className="absolute top-3 left-3 z-10 flex items-center space-x-1.5">
                     <button
                       onClick={(e) => handleOpenEditModal(event, e)}
-                      className="bg-neutral-900/90 hover:bg-black border border-neutral-700 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition"
+                      className="bg-white/95 hover:bg-slate-50 border border-slate-200 text-slate-900 text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition"
                     >
                       Edit
                     </button>
                     <button
                       onClick={(e) => handleDeleteEvent(event.slug, e)}
-                      className="bg-red-950/80 hover:bg-red-900 border border-red-800/50 text-red-300 text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition"
+                      className="bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition"
                     >
                       Delete
                     </button>
@@ -380,9 +403,9 @@ export default function EventsFeedPage() {
 
       {/* Admin Password Modal */}
       {showAdminModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 w-full max-w-sm space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-xl">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
               Admin Authentication
             </h2>
             <form onSubmit={handleAdminLogin} className="space-y-3">
@@ -391,20 +414,20 @@ export default function EventsFeedPage() {
                 placeholder="Enter secret token..."
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                 required
               />
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowAdminModal(false)}
-                  className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white"
+                  className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-white text-black font-bold text-xs rounded-lg hover:bg-neutral-200"
+                  className="px-4 py-1.5 bg-white text-slate-900 font-bold text-xs rounded-lg border border-slate-200 hover:bg-slate-50"
                 >
                   Unlock
                 </button>
@@ -416,10 +439,10 @@ export default function EventsFeedPage() {
 
       {/* Add/Edit Event Modal */}
       {showEventModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 w-full max-w-lg space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-lg space-y-4 my-8 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
                 {editingSlug ? "Edit Event" : "Create New Event"}
               </h2>
               <button
@@ -427,7 +450,7 @@ export default function EventsFeedPage() {
                   setShowEventModal(false);
                   resetForm();
                 }}
-                className="text-neutral-500 hover:text-white text-sm"
+                className="text-slate-500 hover:text-slate-700 text-sm"
               >
                 ✕
               </button>
@@ -436,7 +459,7 @@ export default function EventsFeedPage() {
             <form onSubmit={handleSaveEvent} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     Title
                   </label>
                   <input
@@ -444,12 +467,12 @@ export default function EventsFeedPage() {
                     value={newTitle}
                     onChange={(e) => handleTitleChange(e.target.value)}
                     placeholder="e.g. Rooftop Hangout"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     URL Slug
                   </label>
                   <input
@@ -457,7 +480,7 @@ export default function EventsFeedPage() {
                     value={newSlug}
                     onChange={(e) => setNewSlug(e.target.value)}
                     placeholder="e.g. rooftop-hangout"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                     required
                   />
                 </div>
@@ -465,46 +488,46 @@ export default function EventsFeedPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     Date
                   </label>
                   <input
                     type="text"
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    placeholder="e.g. Friday, Aug 15"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                    placeholder="e.g. Saturday, Aug 1"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     Time
                   </label>
                   <input
                     type="text"
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
-                    placeholder="e.g. 7:00 PM - 11:00 PM"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                    placeholder="e.g. 11:00 AM - 1:00 PM"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-500 mb-1">
-                  Location
+                <label className="block text-[10px] uppercase text-slate-500 mb-1">
+                  Location / Address
                 </label>
                 <input
                   type="text"
                   value={newLocation}
                   onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="e.g. 123 Main St, Apt 4"
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                  placeholder="e.g. 123 Main St, Apt 4B"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                <label className="block text-[10px] uppercase text-slate-500 mb-1">
                   Description
                 </label>
                 <textarea
@@ -512,13 +535,12 @@ export default function EventsFeedPage() {
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="Event details, BYOB info, etc."
                   rows={3}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400"
                 />
               </div>
 
-              {/* Flyer Image File Upload */}
               <div>
-                <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                <label className="block text-[10px] uppercase text-slate-500 mb-1">
                   Flyer Image
                 </label>
                 <div className="space-y-2">
@@ -529,15 +551,15 @@ export default function EventsFeedPage() {
                       const file = e.target.files?.[0];
                       if (file) handleFlyerFileUpload(file);
                     }}
-                    className="w-full text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700 cursor-pointer"
+                    className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-900 hover:file:bg-slate-200 cursor-pointer"
                   />
                   {uploadingFlyer && (
-                    <p className="text-[10px] text-amber-400">
+                    <p className="text-[10px] text-amber-500">
                       Uploading flyer to storage...
                     </p>
                   )}
                   {newFlyerUrl && (
-                    <div className="relative aspect-video w-32 bg-neutral-950 rounded-lg overflow-hidden border border-neutral-800 mt-2">
+                    <div className="relative aspect-video w-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 mt-2">
                       <img
                         src={newFlyerUrl}
                         alt="Flyer Preview"
@@ -548,15 +570,14 @@ export default function EventsFeedPage() {
                 </div>
               </div>
 
-              {/* Active Song Selector Dropdown */}
               <div>
-                <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                <label className="block text-[10px] uppercase text-slate-500 mb-1">
                   Event Active Soundtrack (Optional)
                 </label>
                 <select
                   value={newActiveSong}
                   onChange={(e) => setNewActiveSong(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-white cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400 cursor-pointer"
                 >
                   <option value="">No custom track (use default)</option>
                   {allAvailableSongs.map((track) => (
@@ -574,14 +595,14 @@ export default function EventsFeedPage() {
                     setShowEventModal(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 text-neutral-400 hover:text-white"
+                  className="px-4 py-2 text-slate-500 hover:text-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving || uploadingFlyer}
-                  className="px-5 py-2 bg-white text-black font-bold uppercase rounded-lg hover:bg-neutral-200 transition disabled:opacity-50"
+                  className="px-5 py-2 bg-white text-black font-bold uppercase rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
                   {saving
                     ? "Saving..."

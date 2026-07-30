@@ -42,6 +42,9 @@ export default function SingleEventPage({
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedStatus, setSubmittedStatus] = useState<
+    "in" | "out" | "maybe"
+  >("in");
   const [copied, setCopied] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -81,6 +84,33 @@ export default function SingleEventPage({
     }
   };
 
+  const getConfirmationMessage = (rsvpStatus: "in" | "out" | "maybe") => {
+    switch (rsvpStatus) {
+      case "in":
+        return {
+          title: "You're on the list! 🎉",
+          subtitle: "See you there.",
+          containerStyle:
+            "bg-emerald-100 border-emerald-200 text-emerald-700",
+          subStyle: "text-emerald-700/90",
+        };
+      case "maybe":
+        return {
+          title: "RSVP Received 🤞",
+          subtitle: "Hope you can make it!",
+          containerStyle: "bg-amber-100 border-amber-200 text-amber-700",
+          subStyle: "text-amber-700/90",
+        };
+      case "out":
+        return {
+          title: "Thanks for letting us know 🙏",
+          subtitle: "We'll catch you at the next one!",
+          containerStyle: "bg-slate-100 border-slate-200 text-slate-700",
+          subStyle: "text-slate-500",
+        };
+    }
+  };
+
   const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -96,6 +126,7 @@ export default function SingleEventPage({
       if (res.ok) {
         const data = await res.json();
         setRsvps((prev) => [data.rsvp, ...prev]);
+        setSubmittedStatus(status);
         setSubmitted(true);
       } else {
         alert("Failed to submit RSVP.");
@@ -114,7 +145,7 @@ export default function SingleEventPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-950 font-mono text-white text-xs">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 font-mono text-slate-900 text-xs">
         Loading event details...
       </div>
     );
@@ -122,27 +153,29 @@ export default function SingleEventPage({
 
   if (!event) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 font-mono text-white text-xs space-y-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-mono text-slate-900 text-xs space-y-4">
         <p>Event not found.</p>
-        <Link href="/events" className="underline text-neutral-400">
+        <Link href="/events" className="underline text-slate-600">
           ← Back to all events
         </Link>
       </div>
     );
   }
 
+  const confirmation = getConfirmationMessage(submittedStatus);
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-mono px-4 py-12 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 text-slate-900 font-mono px-4 py-12 flex flex-col items-center">
       {event.activeSong && (
         <audio ref={audioRef} src={event.activeSong} loop preload="auto" />
       )}
 
-      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl space-y-6 pb-8">
+      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl space-y-6 pb-8">
         {/* Back Button & Flyer */}
-        <div className="relative w-full aspect-[4/3] bg-neutral-800 flex items-center justify-center overflow-hidden">
+        <div className="relative w-full aspect-[4/3] bg-slate-100 flex items-center justify-center overflow-hidden">
           <Link
             href="/events"
-            className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] px-3 py-1.5 rounded-full hover:bg-black/80 transition"
+            className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 text-[11px] px-3 py-1.5 rounded-full hover:bg-slate-50 transition"
           >
             ← All Events
           </Link>
@@ -162,7 +195,7 @@ export default function SingleEventPage({
           {event.activeSong && (
             <button
               onClick={toggleMusic}
-              className="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] px-3 py-1.5 rounded-full hover:bg-black/80 transition"
+              className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 text-[11px] px-3 py-1.5 rounded-full hover:bg-slate-50 transition"
             >
               {isPlaying ? "Pause Sound ♫" : "Play Sound ♫"}
             </button>
@@ -172,35 +205,35 @@ export default function SingleEventPage({
         {/* Details & RSVP */}
         <div className="px-6 space-y-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">
               {event.title}
             </h1>
-            <p className="text-xs text-neutral-400 whitespace-pre-line leading-relaxed">
+            <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">
               {event.description}
             </p>
           </div>
 
-          <div className="bg-neutral-950/60 border border-neutral-800/80 rounded-xl p-4 space-y-3 text-xs">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-              <span className="text-neutral-500 uppercase font-semibold">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-slate-500 uppercase font-semibold">
                 Date & Time
               </span>
-              <span className="text-neutral-200 text-right">
+              <span className="text-slate-700 text-right">
                 {event.date} — {event.time}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500 uppercase font-semibold">
+              <span className="text-slate-500 uppercase font-semibold">
                 Location
               </span>
               <div className="flex items-center space-x-2">
-                <span className="text-neutral-200 text-right truncate max-w-[160px]">
+                <span className="text-slate-700 text-right truncate max-w-[160px]">
                   {event.location}
                 </span>
                 <button
                   onClick={handleCopyAddress}
-                  className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-[10px] px-2 py-1 rounded transition"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2 py-1 rounded transition"
                 >
                   {copied ? "Copied!" : "Copy"}
                 </button>
@@ -208,24 +241,26 @@ export default function SingleEventPage({
             </div>
           </div>
 
-          <div className="border-t border-neutral-800 pt-6">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-4">
+          <div className="border-t border-slate-200 pt-6">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
               RSVP
             </h2>
 
             {event.rsvpLocked ? (
-              <div className="text-center py-4 bg-neutral-950 rounded-xl border border-neutral-800 text-xs text-neutral-400">
+              <div className="text-center py-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500">
                 RSVPs are now closed for this event.
               </div>
             ) : submitted ? (
-              <div className="text-center py-6 bg-emerald-950/40 border border-emerald-800/50 rounded-xl text-xs text-emerald-400 space-y-1">
-                <p className="font-bold text-sm">You&apos;re on the list!</p>
-                <p className="text-emerald-500/80">See you there.</p>
+              <div
+                className={`text-center py-6 border rounded-xl text-xs space-y-1 ${confirmation.containerStyle}`}
+              >
+                <p className="font-bold text-sm">{confirmation.title}</p>
+                <p className={confirmation.subStyle}>{confirmation.subtitle}</p>
               </div>
             ) : (
               <form onSubmit={handleRsvpSubmit} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     Your Name
                   </label>
                   <input
@@ -233,7 +268,7 @@ export default function SingleEventPage({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white transition"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400 transition"
                     required
                   />
                 </div>
@@ -246,8 +281,8 @@ export default function SingleEventPage({
                       onClick={() => setStatus(s)}
                       className={`py-2 rounded-lg font-bold text-[11px] uppercase border transition ${
                         status === s
-                          ? "bg-white text-black border-white"
-                          : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-700"
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
                       }`}
                     >
                       {s === "in"
@@ -261,13 +296,13 @@ export default function SingleEventPage({
 
                 {status === "in" && (
                   <div>
-                    <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                    <label className="block text-[10px] uppercase text-slate-500 mb-1">
                       Plus Ones
                     </label>
                     <select
                       value={plusOnes}
                       onChange={(e) => setPlusOnes(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white transition cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400 transition cursor-pointer"
                     >
                       <option value={0}>Just me (+0)</option>
                       <option value={1}>+1 Person</option>
@@ -278,7 +313,7 @@ export default function SingleEventPage({
                 )}
 
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-500 mb-1">
+                  <label className="block text-[10px] uppercase text-slate-500 mb-1">
                     Note (Optional)
                   </label>
                   <input
@@ -286,14 +321,14 @@ export default function SingleEventPage({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="e.g. Bringing drinks!"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-white transition"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-400 transition"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3 bg-white text-black font-bold uppercase rounded-lg text-xs tracking-wider hover:bg-neutral-200 transition disabled:opacity-50"
+                  className="w-full py-3 bg-white text-black font-bold uppercase rounded-lg text-xs tracking-wider hover:bg-slate-100 transition disabled:opacity-50"
                 >
                   {submitting ? "Confirming..." : "Submit RSVP"}
                 </button>
@@ -301,18 +336,18 @@ export default function SingleEventPage({
             )}
           </div>
 
-          <div className="border-t border-neutral-800 pt-6 space-y-3">
+          <div className="border-t border-slate-200 pt-6 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Guest List
               </h2>
-              <span className="text-[11px] text-emerald-400 font-medium">
+              <span className="text-[11px] text-emerald-600 font-medium">
                 ● {goingCount} Attending
               </span>
             </div>
 
             {rsvps.length === 0 ? (
-              <p className="text-[11px] text-neutral-600 italic">
+              <p className="text-[11px] text-slate-500 italic">
                 Be the first to RSVP!
               </p>
             ) : (
@@ -320,19 +355,19 @@ export default function SingleEventPage({
                 {rsvps.map((rsvp) => (
                   <div
                     key={rsvp.id}
-                    className="flex items-center justify-between bg-neutral-950/40 p-2.5 rounded-lg border border-neutral-800/60 text-xs"
+                    className="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs"
                   >
                     <div>
-                      <span className="font-semibold text-neutral-200">
+                      <span className="font-semibold text-slate-900">
                         {rsvp.name}
                       </span>
                       {rsvp.plusOnes > 0 && rsvp.status === "in" && (
-                        <span className="text-[10px] text-neutral-500 ml-1.5">
+                        <span className="text-[10px] text-slate-500 ml-1.5">
                           (+{rsvp.plusOnes})
                         </span>
                       )}
                       {rsvp.note && (
-                        <p className="text-[10px] text-neutral-400 mt-0.5">
+                        <p className="text-[10px] text-slate-600 mt-0.5">
                           {rsvp.note}
                         </p>
                       )}
@@ -341,10 +376,10 @@ export default function SingleEventPage({
                     <span
                       className={`text-[10px] uppercase px-2 py-0.5 rounded font-bold ${
                         rsvp.status === "in"
-                          ? "bg-emerald-950 text-emerald-400 border border-emerald-800/50"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                           : rsvp.status === "maybe"
-                            ? "bg-amber-950 text-amber-400 border border-amber-800/50"
-                            : "bg-neutral-800 text-neutral-500"
+                            ? "bg-amber-100 text-amber-700 border border-amber-200"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
                       }`}
                     >
                       {rsvp.status}

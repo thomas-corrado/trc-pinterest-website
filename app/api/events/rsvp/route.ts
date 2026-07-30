@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
 import { list, put } from "@vercel/blob";
 
+interface RSVPEntry {
+  name: string;
+  status: "yes" | "maybe" | "no";
+  note: string;
+  createdAt: string;
+}
+
 export const revalidate = 0; // Disable caching on route level
 
 export async function POST(request: Request) {
   try {
-    const { slug, name, status, note } = await request.json();
+    const body = (await request.json()) as {
+      slug?: string;
+      name?: string;
+      status?: "yes" | "maybe" | "no";
+      note?: string;
+    };
+    const { slug, name, status, note } = body;
 
     if (!slug || !name || !status) {
       return NextResponse.json(
@@ -17,27 +30,27 @@ export async function POST(request: Request) {
     const rsvpFileName = `rsvps-${slug}.json`;
 
     // 1. Fetch current list without cache
-    let rsvps = [];
+    let rsvps: RSVPEntry[] = [];
     try {
       const rsvpBlobs = await list({ prefix: rsvpFileName });
       if (rsvpBlobs.blobs.length > 0) {
         const res = await fetch(rsvpBlobs.blobs[0].url, { cache: "no-store" });
-        rsvps = await res.json();
+        rsvps = (await res.json()) as RSVPEntry[];
       }
-    } catch (e) {
+    } catch {
       console.warn("No existing RSVP file found, creating new one.");
     }
 
     // 2. Upsert user RSVP (prevent duplicates if same person submits again)
-    const newEntry = {
+    const newEntry: RSVPEntry = {
       name: name.trim(),
-      status, // "yes" | "maybe" | "no"
+      status,
       note: note ? note.trim() : "",
       createdAt: new Date().toISOString(),
     };
 
     const existingIndex = rsvps.findIndex(
-      (r: any) => r.name.toLowerCase() === name.trim().toLowerCase(),
+      (rsvp) => rsvp.name.toLowerCase() === name.trim().toLowerCase(),
     );
 
     if (existingIndex >= 0) {

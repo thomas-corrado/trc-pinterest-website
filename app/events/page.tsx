@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface EventItem {
@@ -319,10 +320,11 @@ export default function EventsFeedPage() {
                 >
                   <div className="w-full aspect-[16/9] bg-slate-100 overflow-hidden relative">
                     {event.flyerUrl ? (
-                      <img
+                      <Image
                         src={event.flyerUrl}
                         alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        fill
+                        className="object-cover group-hover:scale-105 transition duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-500 text-[10px] uppercase tracking-widest">
@@ -560,10 +562,11 @@ export default function EventsFeedPage() {
                   )}
                   {newFlyerUrl && (
                     <div className="relative aspect-video w-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-200 mt-2">
-                      <img
+                      <Image
                         src={newFlyerUrl}
                         alt="Flyer Preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   )}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface EventItem {
@@ -181,10 +182,11 @@ export default function SingleEventPage({
           </Link>
 
           {event.flyerUrl ? (
-            <img
+            <Image
               src={event.flyerUrl}
               alt={event.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="text-neutral-500 text-xs uppercase tracking-widest">

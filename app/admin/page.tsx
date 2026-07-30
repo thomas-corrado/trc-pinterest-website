@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { upload } from "@vercel/blob/client";
 
 const LOCAL_SONGS = [
@@ -282,10 +283,11 @@ export default function AdminPage() {
                       key={idx}
                       className="relative aspect-square bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800"
                     >
-                      <img
+                      <Image
                         src={URL.createObjectURL(f)}
                         alt={f.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

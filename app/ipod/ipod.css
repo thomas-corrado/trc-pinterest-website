@@ -120,6 +120,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-left: auto;
   color: #424951;
   font-size: 10px;
 }
@@ -301,6 +302,11 @@
   align-items: center;
 }
 
+.ipod-now-playing .ipod-artwork {
+  width: 84px;
+  height: 78px;
+}
+
 .ipod-artwork {
   position: relative;
   width: 112px;
@@ -370,6 +376,47 @@
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ipod-share-button {
+  margin-top: 5px;
+  padding: 3px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #d5d9dd;
+  border-radius: 3px;
+  background: linear-gradient(#fff, #edf0f2);
+  color: #606a73;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.ipod-share-button:hover {
+  border-color: #9eabb6;
+  color: #34495b;
+}
+
+.ipod-share-button:focus-visible {
+  outline: 2px solid #5d8db6;
+  outline-offset: 2px;
+}
+
+.ipod-share-button svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.ipod-share-message {
+  margin: 3px 0 0;
+  color: #647b6a;
+  font-size: 8px;
 }
 
 .ipod-track-artist {

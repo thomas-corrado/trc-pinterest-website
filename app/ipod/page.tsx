@@ -43,6 +43,7 @@ export default function IpodPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [playbackError, setPlaybackError] = useState("");
+  const [shareMessage, setShareMessage] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -66,10 +67,21 @@ export default function IpodPage() {
           ? data.uploadedSongs
           : [];
         setSongs(uploadedSongs);
+        const sharedSong = new URLSearchParams(window.location.search).get(
+          "song",
+        );
+        const sharedSongIndex = uploadedSongs.findIndex(
+          (song) => song.file === sharedSong,
+        );
         const activeSongIndex = uploadedSongs.findIndex(
           (song) => song.file === data.song,
         );
-        setSelectedIndex(activeSongIndex >= 0 ? activeSongIndex : 0);
+        if (sharedSongIndex >= 0) {
+          setSelectedIndex(sharedSongIndex);
+          setScreen("now-playing");
+        } else {
+          setSelectedIndex(activeSongIndex >= 0 ? activeSongIndex : 0);
+        }
       })
       .catch((error: unknown) => {
         if (error instanceof Error && error.name === "AbortError") return;
@@ -92,6 +104,7 @@ export default function IpodPage() {
     setSelectedIndex(index);
     setScreen("now-playing");
     setPlaybackError("");
+    setShareMessage("");
     setCurrentTime(0);
     audio.src = song.file;
     audio.currentTime = 0;
@@ -121,6 +134,27 @@ export default function IpodPage() {
     if (songs.length === 0) return;
     const nextIndex = (selectedIndex + offset + songs.length) % songs.length;
     playTrack(nextIndex);
+  };
+
+  const shareSong = async (song: Song) => {
+    const shareUrl = new URL("/ipod", window.location.origin);
+    shareUrl.searchParams.set("song", song.file);
+    const url = shareUrl.toString();
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: displayTitle(song.title), url });
+        setShareMessage("Link shared");
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setShareMessage("Link copied");
+      } else {
+        setShareMessage("Sharing isn’t available in this browser.");
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      setShareMessage("Couldn’t share this song. Please try again.");
+    }
   };
 
   const seek = (value: string) => {
@@ -220,6 +254,23 @@ export default function IpodPage() {
                   <p className="ipod-track-name">
                     {selectedSong ? displayTitle(selectedSong.title) : "Choose a song"}
                   </p>
+                  {selectedSong && (
+                    <button
+                      className="ipod-share-button"
+                      type="button"
+                      onClick={() => shareSong(selectedSong)}
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M8 10V1m0 0L4.5 4.5M8 1l3.5 3.5M2 8v6h12V8" />
+                      </svg>
+                      Share
+                    </button>
+                  )}
+                  {shareMessage && (
+                    <p className="ipod-share-message" role="status">
+                      {shareMessage}
+                    </p>
+                  )}
                 </div>
                 <div className="ipod-progress">
                   <input
@@ -309,7 +360,7 @@ export default function IpodPage() {
 
       {selectedSong && isPlaying && (
         <p className="ipod-caption">
-          Now spinning: {displayTitle(selectedSong.title)}
+          {displayTitle(selectedSong.title)}
         </p>
       )}
       <audio

@@ -83,11 +83,6 @@
   letter-spacing: -0.08em;
 }
 
-.ipod-brand-mark {
-  color: #90959a;
-  font-size: 6px;
-}
-
 .ipod-screen-frame {
   padding: 7px;
   border: 1px solid #73777b;
@@ -456,6 +451,13 @@
 
 .ipod-wheel-button:hover {
   color: #353b41;
+}
+
+.ipod-skip-icon {
+  display: block;
+  width: 19px;
+  height: 12px;
+  fill: currentColor;
 }
 
 .ipod-wheel-button:focus-visible,

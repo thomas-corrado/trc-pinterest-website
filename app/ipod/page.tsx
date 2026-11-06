@@ -141,9 +141,6 @@ export default function IpodPage() {
       <section className="ipod-device" aria-label="iPod music player">
         <div className="ipod-device-top">
           <span className="ipod-brand">iPod</span>
-          <span className="ipod-brand-mark" aria-hidden="true">
-            ●
-          </span>
         </div>
 
         <div className="ipod-screen-frame">
@@ -266,14 +263,26 @@ export default function IpodPage() {
             onClick={() => playRelativeTrack(-1)}
             aria-label="Previous track"
           >
-            ◀◀
+            <svg
+              className="ipod-skip-icon"
+              viewBox="0 0 20 12"
+              aria-hidden="true"
+            >
+              <path d="M1 2h2v8H1zM12 1 5 6l7 5zM19 1l-7 5 7 5z" />
+            </svg>
           </button>
           <button
             className="ipod-wheel-button ipod-wheel-next"
             onClick={() => playRelativeTrack(1)}
             aria-label="Next track"
           >
-            ▶▶
+            <svg
+              className="ipod-skip-icon"
+              viewBox="0 0 20 12"
+              aria-hidden="true"
+            >
+              <path d="M17 2h2v8h-2zM8 1l7 5-7 5zM1 1l7 5-7 5z" />
+            </svg>
           </button>
           <button
             className="ipod-wheel-button ipod-wheel-play"

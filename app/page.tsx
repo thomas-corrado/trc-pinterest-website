@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const [images, setImages] = useState<string[]>([]);
@@ -120,6 +121,12 @@ export default function Home() {
 
       {/* Global Manual Music Deck */}
       <div className="fixed bottom-4 right-4 z-50 flex gap-2">
+        <Link
+          href="/ipod"
+          className="px-4 py-2 bg-gray-800 text-white rounded-md font-mono text-xs shadow-md transition hover:bg-gray-700"
+        >
+          Open iPod
+        </Link>
         <button
           onClick={() => audioRef.current?.play()}
           className="px-4 py-2 bg-green-500 text-white rounded-md font-mono text-xs shadow-md transition hover:bg-green-600"

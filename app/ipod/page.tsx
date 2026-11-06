@@ -31,7 +31,6 @@ function AlbumArtwork() {
       <span className="ipod-artwork-sun" />
       <span className="ipod-artwork-horizon" />
       <span className="ipod-artwork-label">trc</span>
-      <span className="ipod-artwork-stamp">SIDE A</span>
     </div>
   );
 }
@@ -146,7 +145,6 @@ export default function IpodPage() {
         <div className="ipod-screen-frame">
           <div className="ipod-screen">
             <div className="ipod-status-bar">
-              <span>{screen === "music" ? "Music" : "Now Playing"}</span>
               <span className="ipod-status-right">
                 {isPlaying && <span className="ipod-playing-dot" />}
                 <span aria-label={`${Math.round(volume * 100)} percent volume`}>
@@ -222,7 +220,6 @@ export default function IpodPage() {
                   <p className="ipod-track-name">
                     {selectedSong ? displayTitle(selectedSong.title) : "Choose a song"}
                   </p>
-                  <p className="ipod-track-artist">trc · uploaded music</p>
                 </div>
                 <div className="ipod-progress">
                   <input
@@ -310,11 +307,9 @@ export default function IpodPage() {
         </div>
       </section>
 
-      {selectedSong && (
+      {selectedSong && isPlaying && (
         <p className="ipod-caption">
-          {isPlaying
-            ? `Now spinning: ${displayTitle(selectedSong.title)}`
-            : `${songs.length} ${songs.length === 1 ? "track" : "tracks"} in your library`}
+          Now spinning: {displayTitle(selectedSong.title)}
         </p>
       )}
       <audio
